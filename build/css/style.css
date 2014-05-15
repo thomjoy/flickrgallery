@@ -1,0 +1,11 @@
+/* style.css */
+h1 { font-family: Helvetica, Arial, sans; color: #333; }
+
+nav { background-color: #eee; border-bottom: 1px solid #ddd !important; }
+nav #header div { padding: 10px; }
+nav #header div button { margin-left: 6px; }
+
+#app-container { margin-top: 50px; }
+
+#gallery { list-style-type: none; margin-top: 20px; width: 80%; }
+#gallery li { float: left; }
