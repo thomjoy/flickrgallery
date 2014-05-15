@@ -26,11 +26,6 @@ class ButtonViewMediator extends mmvc.impl.Mediator<ButtonView>
 		super.onRemove();
 	}
 
-	function onCompleted()
-	{
-		// signal the gallery that data is available for loading?
-	}
-
 	function searchHandler(event:String, searchTerm:String)
 	{
 		if(event == ButtonView.DO_SEARCH)
@@ -38,7 +33,6 @@ class ButtonViewMediator extends mmvc.impl.Mediator<ButtonView>
 			// This should be a request to a service, or instainatied somewhere else?
 			var f = new Flickr();
 			f.search( searchTerm );	
-			//f.signal.add(function(p1) { trace(p1); } );
 			f.signal.add(processSearch);
 		}
 
@@ -48,9 +42,9 @@ class ButtonViewMediator extends mmvc.impl.Mediator<ButtonView>
 	{
 		/*
 			JSON.parse(req.responseText).photos.photo.map(function(p) {
-	        	return '<li><img src=http://farm' + p.farm + '.staticflickr.com/' + p.server + '/' + p.id + '_' + p.secret + '.jpg /></li>';
+	        	return '<li><img src=http://farm' + p.farm + '.staticflickr.com/' + p.server + '/' + p.id + '_' + p.secret + '_q.jpg /></li>';
 	        });
 		*/
-		trace(searchResults);
+		trace(searchResults.photos);
 	}
 }
