@@ -9,3 +9,8 @@ nav #header div button { margin-left: 6px; }
 
 #gallery { list-style-type: none; margin-top: 20px; width: 80%; }
 #gallery li { float: left; }
+#gallery li img { width: 120px; }
+
+#mylist { list-style-type: none; overflow: hidden; margin: 0px; padding: 0px; background-color: #eee; }
+#mylist li { float: left; padding: 4px; margin: 4px; background-color: #fff; }
+#mylist li img { width: 50px; }
