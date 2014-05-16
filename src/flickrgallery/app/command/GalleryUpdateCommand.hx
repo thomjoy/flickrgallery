@@ -1,12 +1,11 @@
 package flickrgallery.app.command;
 
+import haxe.Json;
 import mmvc.impl.Command;
-
 import flickrgallery.app.api.Flickr;
-
 import flickrgallery.app.signal.GalleryUpdateSignal;
 import flickrgallery.app.model.GalleryModel;
-import flickrgallery.app.model.SearchTerm;
+import flickrgallery.app.model.GalleryItemModel;
 
 class GalleryUpdateCommand extends mmvc.impl.Command
 {
@@ -20,7 +19,7 @@ class GalleryUpdateCommand extends mmvc.impl.Command
 	public var flickr:Flickr;
 
 	@inject
-	public var searchTerm:SearchTerm;
+	public var searchTerm:String;
 
 	public function new()
 	{
@@ -29,10 +28,35 @@ class GalleryUpdateCommand extends mmvc.impl.Command
 
 	override public function execute():Void
 	{
-		trace(this.searchTerm.term);
-		trace('GalleryUpdateCommand.execute');
+		flickr.search(this.searchTerm);
+		flickr.signal.add(this.handleFlickrSearchResponse);
+	}
 
-		flickr.search( this.searchTerm.term );
-		//flickr.signal.add(function(jsonData) { galleryModel.addFromJSON(jsonData); });
+	function handleFlickrSearchResponse(resp: Json)
+	{
+		if( Reflect.field(resp, 'stat') == 'ok' )
+		{
+			var resultArray = [];
+			var photos = cast(Reflect.field(Reflect.field(resp, 'photos'), 'photo'), Array<Dynamic>);
+
+			for( photo in photos )
+			{
+				var farm = Reflect.field(photo, 'farm');
+				var server = Reflect.field(photo, 'server');
+				var id = Reflect.field(photo, 'id');
+				var secret = Reflect.field(photo, 'secret');
+				var url = "http://farm" + farm + ".staticflickr.com/" + server + "/" + id + "_" + secret + "_n.jpg";
+				
+				var model = new GalleryItemModel(url);
+				trace(model);
+				resultArray.push(model);
+			}
+
+			trace(galleryModel.length);
+			galleryModel.clear();
+			trace(galleryModel.length);
+			galleryModel.addAll( resultArray );
+			trace(galleryModel.length);
+		}
 	}
 }

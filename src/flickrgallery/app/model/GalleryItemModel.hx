@@ -1,21 +1,30 @@
 package flickrgallery.app.model;
 
-class GalleryItemModel
+import msignal.Signal;
+
+class GalleryItemModel 
 {
-	public var id:String;
+	public var url:String;
 	public var favourite:Bool;
 
-	public function new(id:String)
+	public var signal:Signal1<String>;
+
+	inline public static var ADD_FAVOURITE = 'ADD_FAVOURITE';
+	inline public static var REMOVE_FAVOURITE = 'REMOVE_FAVOURITE';
+
+	public function new(url:String)
 	{
-		this.id = id;
+		this.url = url;
 		this.favourite = false;
+
+		this.signal = new Signal1<String>();
 	}
 
-	/**
-	Serializes the data object as a JSON string 
-	*/
-	public function toString():String
+	public function toggleFavourite(oldStatus: Bool)
 	{
-		return haxe.Json.stringify(this);
+		favourite = !oldStatus;
+
+		var action = favourite ? GalleryItemModel.ADD_FAVOURITE :  GalleryItemModel.REMOVE_FAVOURITE;
+		signal.dispatch( action );
 	}
 }

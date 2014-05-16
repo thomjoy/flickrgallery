@@ -182,8 +182,6 @@ class View
 		element.appendChild(view.element);
 
 		dispatch(ADDED, view);
-		
-		
 	}
 
 

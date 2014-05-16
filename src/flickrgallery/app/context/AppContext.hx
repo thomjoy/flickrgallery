@@ -37,25 +37,26 @@ class AppContext extends mmvc.impl.Context
 		// Gallery Model
 		injector.mapSingleton(GalleryModel);
 
+		// Gallery Item Models
+		injector.mapClass(GalleryItemModel, GalleryItemModel);
+
 		// map Signals -> Commands
 		commandMap.mapSignalClass(GalleryUpdateSignal, GalleryUpdateCommand);
 
 		// Subviews
 		mediatorMap.mapView(GalleryView, GalleryViewMediator);
-		mediatorMap.mapView(GalleryItemView, GalleryViewMediator);
 		mediatorMap.mapView(SearchBoxView, SearchBoxViewMediator);
 		mediatorMap.mapView(ButtonView, ButtonViewMediator);
+
+		// Dynamically added
+		mediatorMap.mapView(GalleryItemView, GalleryItemViewMediator);
 
 		// wiring for main application module
 		mediatorMap.mapView(AppView, AppViewMediator);
 	}
 
-	/**
-	Overrides shutdown to remove/cleanup mappings
-	@see mmvc.impl.Context
-	*/
 	override public function shutdown()
 	{
-		
+		trace('shutdown');
 	}
 }

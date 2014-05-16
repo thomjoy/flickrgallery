@@ -22,6 +22,30 @@ class AppView extends View implements mmvc.api.IViewContainer
 		element.setAttribute("id", "app-container");
 	}
 
+	/**
+	Overrides signal bubbling to trigger view added/removed handlers for IViewContainer
+	@param event 	a string event type
+	@param view 	instance of view that originally dispatched the event
+	*/
+	override public function dispatch(event:String, view:View)
+	{
+		switch(event)
+		{
+			case View.ADDED:
+			{
+				viewAdded(view);
+			}
+			case View.REMOVED:
+			{
+				viewRemoved(view);
+			}
+			default:
+			{
+				super.dispatch(event, view);
+			}
+		}
+	}
+
 	public function isAdded(view:Dynamic):Bool
 	{
 		return true;
@@ -30,12 +54,14 @@ class AppView extends View implements mmvc.api.IViewContainer
 	public function createViews()
 	{
 		var searchBoxView = new SearchBoxView();
+		addChild(searchBoxView);
 		this.viewAdded(searchBoxView);
 
 		// trying to add the button view to the context
 		this.viewAdded(searchBoxView.children[1]);
 		
 		var galleryView = new GalleryView();
+		addChild(galleryView);
 		this.viewAdded(galleryView);
 
 		trace('AppView.createViews');

@@ -7,7 +7,7 @@ nav #header div button { margin-left: 6px; }
 
 #app-container { margin-top: 50px; }
 
-#gallery { list-style-type: none; margin-top: 20px; width: 80%; }
+#gallery { list-style-type: none; margin-top: 20px; width: 100%; }
 #gallery li { float: left; }
 #gallery li img { width: 120px; }
 

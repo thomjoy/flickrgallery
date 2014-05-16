@@ -2,8 +2,6 @@ package flickrgallery.app.mediator;
 
 import flickrgallery.app.view.ButtonView;
 import flickrgallery.app.signal.GalleryUpdateSignal;
-import flickrgallery.app.model.SearchTerm;
-
 class ButtonViewMediator extends mmvc.impl.Mediator<ButtonView>
 {
 	@inject
@@ -32,7 +30,7 @@ class ButtonViewMediator extends mmvc.impl.Mediator<ButtonView>
 		if(event == ButtonView.DO_SEARCH)
 		{
 			// Inform the Gallery model to fetch images.
-			galleryUpdateSignal.dispatch( new SearchTerm(searchTerm) );
+			galleryUpdateSignal.dispatch( searchTerm );
 		}
 	}
 }

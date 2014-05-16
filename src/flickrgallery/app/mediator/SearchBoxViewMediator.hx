@@ -21,5 +21,4 @@ class SearchBoxViewMediator extends mmvc.impl.Mediator<SearchBoxView>
 		super.onRemove();
 		trace('SearchBoxViewMediator.onRemove');
 	}
-
 }

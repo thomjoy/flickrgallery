@@ -9,6 +9,11 @@ function $extend(from, fields) {
 var HxOverrides = function() { };
 $hxClasses["HxOverrides"] = HxOverrides;
 HxOverrides.__name__ = ["HxOverrides"];
+HxOverrides.cca = function(s,index) {
+	var x = s.charCodeAt(index);
+	if(x != x) return undefined;
+	return x;
+};
 HxOverrides.substr = function(s,pos,len) {
 	if(pos != null && pos != 0 && len != null && len < 0) return "";
 	if(len == null) len = s.length;
@@ -177,6 +182,12 @@ $hxClasses["Std"] = Std;
 Std.__name__ = ["Std"];
 Std.string = function(s) {
 	return js.Boot.__string_rec(s,"");
+};
+Std.parseInt = function(x) {
+	var v = parseInt(x,10);
+	if(v == 0 && (HxOverrides.cca(x,1) == 120 || HxOverrides.cca(x,1) == 88)) v = parseInt(x);
+	if(isNaN(v)) return null;
+	return v;
 };
 Std.random = function(x) {
 	if(x <= 0) return 0; else return Math.floor(Math.random() * x);
@@ -376,9 +387,33 @@ flickrgallery.app.command.GalleryUpdateCommand.prototype = $extend(mmvc.impl.Com
 	,flickr: null
 	,searchTerm: null
 	,execute: function() {
-		console.log(this.searchTerm.term);
-		console.log("GalleryUpdateCommand.execute");
-		this.flickr.search(this.searchTerm.term);
+		this.flickr.search(this.searchTerm);
+		this.flickr.signal.add($bind(this,this.handleFlickrSearchResponse));
+	}
+	,handleFlickrSearchResponse: function(resp) {
+		if(Reflect.field(resp,"stat") == "ok") {
+			var resultArray = [];
+			var photos;
+			photos = js.Boot.__cast(Reflect.field(Reflect.field(resp,"photos"),"photo") , Array);
+			var _g = 0;
+			while(_g < photos.length) {
+				var photo = photos[_g];
+				++_g;
+				var farm = Reflect.field(photo,"farm");
+				var server = Reflect.field(photo,"server");
+				var id = Reflect.field(photo,"id");
+				var secret = Reflect.field(photo,"secret");
+				var url = "http://farm" + farm + ".staticflickr.com/" + server + "/" + id + "_" + secret + "_n.jpg";
+				var model = new flickrgallery.app.model.GalleryItemModel(url);
+				console.log(model);
+				resultArray.push(model);
+			}
+			console.log(this.galleryModel.get_length());
+			this.galleryModel.clear();
+			console.log(this.galleryModel.get_length());
+			this.galleryModel.addAll(resultArray);
+			console.log(this.galleryModel.get_length());
+		}
 	}
 	,__class__: flickrgallery.app.command.GalleryUpdateCommand
 });
@@ -473,14 +508,16 @@ flickrgallery.app.context.AppContext.prototype = $extend(mmvc.impl.Context.proto
 		console.log("AppContext.startup");
 		this.get_injector().mapSingleton(flickrgallery.app.api.Flickr);
 		this.get_injector().mapSingleton(flickrgallery.app.model.GalleryModel);
+		this.get_injector().mapClass(flickrgallery.app.model.GalleryItemModel,flickrgallery.app.model.GalleryItemModel);
 		this.get_commandMap().mapSignalClass(flickrgallery.app.signal.GalleryUpdateSignal,flickrgallery.app.command.GalleryUpdateCommand);
 		this.get_mediatorMap().mapView(flickrgallery.app.view.GalleryView,flickrgallery.app.mediator.GalleryViewMediator);
-		this.get_mediatorMap().mapView(flickrgallery.app.view.GalleryItemView,flickrgallery.app.mediator.GalleryViewMediator);
 		this.get_mediatorMap().mapView(flickrgallery.app.view.SearchBoxView,flickrgallery.app.mediator.SearchBoxViewMediator);
 		this.get_mediatorMap().mapView(flickrgallery.app.view.ButtonView,flickrgallery.app.mediator.ButtonViewMediator);
+		this.get_mediatorMap().mapView(flickrgallery.app.view.GalleryItemView,flickrgallery.app.mediator.GalleryItemViewMediator);
 		this.get_mediatorMap().mapView(flickrgallery.app.view.AppView,flickrgallery.app.mediator.AppViewMediator);
 	}
 	,shutdown: function() {
+		console.log("shutdown");
 	}
 	,__class__: flickrgallery.app.context.AppContext
 });
@@ -557,10 +594,17 @@ $hxClasses["flickrgallery.app.mediator.AppViewMediator"] = flickrgallery.app.med
 flickrgallery.app.mediator.AppViewMediator.__name__ = ["flickrgallery","app","mediator","AppViewMediator"];
 flickrgallery.app.mediator.AppViewMediator.__super__ = mmvc.impl.Mediator;
 flickrgallery.app.mediator.AppViewMediator.prototype = $extend(mmvc.impl.Mediator.prototype,{
-	onRegister: function() {
+	gallery: null
+	,onRegister: function() {
 		mmvc.impl.Mediator.prototype.onRegister.call(this);
 		this.view.createViews();
 		console.log("AppViewMediator.onRegister");
+	}
+	,onGalleryChange: function(event) {
+		return true;
+	}
+	,onFavouritesChange: function(event) {
+		return true;
 	}
 	,onRemove: function() {
 		mmvc.impl.Mediator.prototype.onRemove.call(this);
@@ -584,9 +628,33 @@ flickrgallery.app.mediator.ButtonViewMediator.prototype = $extend(mmvc.impl.Medi
 		mmvc.impl.Mediator.prototype.onRemove.call(this);
 	}
 	,searchHandler: function(event,searchTerm) {
-		if(event == "DO_SEARCH") this.galleryUpdateSignal.dispatch(new flickrgallery.app.model.SearchTerm(searchTerm));
+		if(event == "DO_SEARCH") this.galleryUpdateSignal.dispatch(searchTerm);
 	}
 	,__class__: flickrgallery.app.mediator.ButtonViewMediator
+});
+flickrgallery.app.mediator.GalleryItemViewMediator = function() {
+	mmvc.impl.Mediator.call(this);
+};
+$hxClasses["flickrgallery.app.mediator.GalleryItemViewMediator"] = flickrgallery.app.mediator.GalleryItemViewMediator;
+flickrgallery.app.mediator.GalleryItemViewMediator.__name__ = ["flickrgallery","app","mediator","GalleryItemViewMediator"];
+flickrgallery.app.mediator.GalleryItemViewMediator.__super__ = mmvc.impl.Mediator;
+flickrgallery.app.mediator.GalleryItemViewMediator.prototype = $extend(mmvc.impl.Mediator.prototype,{
+	model: null
+	,collection: null
+	,onRegister: function() {
+		mmvc.impl.Mediator.prototype.onRegister.call(this);
+		this.mediate(this.view.signal.add($bind(this,this.onClick)));
+		console.log("GalleryViewMediator.onRegister");
+	}
+	,onClick: function(status,view) {
+		console.log("updateFavouriteHandler:" + status);
+		var castStatus;
+		if(status == "false") castStatus = false; else castStatus = true;
+		var modelId = Std.parseInt(view.id.substring(4,view.id.length));
+		console.log(modelId);
+		this.collection.get(modelId - 1).toggleFavourite(castStatus);
+	}
+	,__class__: flickrgallery.app.mediator.GalleryItemViewMediator
 });
 flickrgallery.app.mediator.GalleryViewMediator = function() {
 	mmvc.impl.Mediator.call(this);
@@ -595,14 +663,34 @@ $hxClasses["flickrgallery.app.mediator.GalleryViewMediator"] = flickrgallery.app
 flickrgallery.app.mediator.GalleryViewMediator.__name__ = ["flickrgallery","app","mediator","GalleryViewMediator"];
 flickrgallery.app.mediator.GalleryViewMediator.__super__ = mmvc.impl.Mediator;
 flickrgallery.app.mediator.GalleryViewMediator.prototype = $extend(mmvc.impl.Mediator.prototype,{
-	onRegister: function() {
+	collection: null
+	,onRegister: function() {
 		mmvc.impl.Mediator.prototype.onRegister.call(this);
 		this.view.createViews();
+		this.mediate(this.collection.get_changed().add($bind(this,this.onGalleryUpdate)));
 		console.log("GalleryViewMediator.onRegister");
 	}
 	,onRemove: function() {
 		mmvc.impl.Mediator.prototype.onRemove.call(this);
 		console.log("GalleryViewMediator.onRemove");
+	}
+	,onGalleryUpdate: function(event) {
+		var _g = event.type[0];
+		switch(_g) {
+		case "Add":
+			var _g1 = 0;
+			var _g2 = this.collection.getAll();
+			while(_g1 < _g2.length) {
+				var galleryItem = _g2[_g1];
+				++_g1;
+				var itemView = new flickrgallery.app.view.GalleryItemView(galleryItem.url);
+				this.view.addChild(itemView);
+			}
+			break;
+		case "Remove":
+			console.log("Remove the old subviews");
+			break;
+		}
 	}
 	,__class__: flickrgallery.app.mediator.GalleryViewMediator
 });
@@ -624,21 +712,6 @@ flickrgallery.app.mediator.SearchBoxViewMediator.prototype = $extend(mmvc.impl.M
 	}
 	,__class__: flickrgallery.app.mediator.SearchBoxViewMediator
 });
-flickrgallery.app.model = {};
-flickrgallery.app.model.GalleryItemModel = function(id) {
-	this.id = id;
-	this.favourite = false;
-};
-$hxClasses["flickrgallery.app.model.GalleryItemModel"] = flickrgallery.app.model.GalleryItemModel;
-flickrgallery.app.model.GalleryItemModel.__name__ = ["flickrgallery","app","model","GalleryItemModel"];
-flickrgallery.app.model.GalleryItemModel.prototype = {
-	id: null
-	,favourite: null
-	,toString: function() {
-		return JSON.stringify(this);
-	}
-	,__class__: flickrgallery.app.model.GalleryItemModel
-};
 var mdata = {};
 mdata.Collection = function() { };
 $hxClasses["mdata.Collection"] = mdata.Collection;
@@ -932,6 +1005,7 @@ mdata.ArrayList.prototype = $extend(mdata.CollectionBase.prototype,{
 	,__class__: mdata.ArrayList
 	,__properties__: $extend(mdata.CollectionBase.prototype.__properties__,{get_length:"get_length",get_last:"get_last",get_first:"get_first"})
 });
+flickrgallery.app.model = {};
 flickrgallery.app.model.GalleryModel = function(values) {
 	mdata.ArrayList.call(this,values);
 };
@@ -939,25 +1013,47 @@ $hxClasses["flickrgallery.app.model.GalleryModel"] = flickrgallery.app.model.Gal
 flickrgallery.app.model.GalleryModel.__name__ = ["flickrgallery","app","model","GalleryModel"];
 flickrgallery.app.model.GalleryModel.__super__ = mdata.ArrayList;
 flickrgallery.app.model.GalleryModel.prototype = $extend(mdata.ArrayList.prototype,{
-	signal: null
-	,fetch: function(searchTerm) {
-		var flickr = new flickrgallery.app.api.Flickr();
-		flickr.search(searchTerm);
-		flickr.signal.add($bind(this,this.processSearch));
+	createGalleryItems: function(imgUrls) {
+		var _g1 = 0;
+		var _g = imgUrls.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			this.add(new flickrgallery.app.model.GalleryItemModel(imgUrls[i]));
+			console.log("adding: " + imgUrls[i]);
+		}
 	}
-	,processSearch: function(searchResults) {
-		console.log(searchResults);
+	,getAll: function() {
+		return this.source;
 	}
 	,__class__: flickrgallery.app.model.GalleryModel
 });
-flickrgallery.app.model.SearchTerm = function(term) {
-	this.term = term;
+flickrgallery.app.model.FavouritesModel = function(values) {
+	flickrgallery.app.model.GalleryModel.call(this,values);
 };
-$hxClasses["flickrgallery.app.model.SearchTerm"] = flickrgallery.app.model.SearchTerm;
-flickrgallery.app.model.SearchTerm.__name__ = ["flickrgallery","app","model","SearchTerm"];
-flickrgallery.app.model.SearchTerm.prototype = {
-	term: null
-	,__class__: flickrgallery.app.model.SearchTerm
+$hxClasses["flickrgallery.app.model.FavouritesModel"] = flickrgallery.app.model.FavouritesModel;
+flickrgallery.app.model.FavouritesModel.__name__ = ["flickrgallery","app","model","FavouritesModel"];
+flickrgallery.app.model.FavouritesModel.__super__ = flickrgallery.app.model.GalleryModel;
+flickrgallery.app.model.FavouritesModel.prototype = $extend(flickrgallery.app.model.GalleryModel.prototype,{
+	__class__: flickrgallery.app.model.FavouritesModel
+});
+flickrgallery.app.model.GalleryItemModel = function(url) {
+	this.url = url;
+	this.favourite = false;
+	this.signal = new msignal.Signal1();
+};
+$hxClasses["flickrgallery.app.model.GalleryItemModel"] = flickrgallery.app.model.GalleryItemModel;
+flickrgallery.app.model.GalleryItemModel.__name__ = ["flickrgallery","app","model","GalleryItemModel"];
+flickrgallery.app.model.GalleryItemModel.prototype = {
+	url: null
+	,favourite: null
+	,signal: null
+	,toggleFavourite: function(oldStatus) {
+		this.favourite = !oldStatus;
+		var action;
+		if(this.favourite) action = "ADD_FAVOURITE"; else action = "REMOVE_FAVOURITE";
+		this.signal.dispatch(action);
+	}
+	,__class__: flickrgallery.app.model.GalleryItemModel
 };
 var msignal = {};
 msignal.Signal = function(valueClasses) {
@@ -1048,18 +1144,14 @@ msignal.Signal1.prototype = $extend(msignal.Signal.prototype,{
 });
 flickrgallery.app.signal = {};
 flickrgallery.app.signal.GalleryUpdateSignal = function() {
-	msignal.Signal1.call(this);
+	msignal.Signal1.call(this,String);
 	console.log("GalleryUpdateSignal.new");
 };
 $hxClasses["flickrgallery.app.signal.GalleryUpdateSignal"] = flickrgallery.app.signal.GalleryUpdateSignal;
 flickrgallery.app.signal.GalleryUpdateSignal.__name__ = ["flickrgallery","app","signal","GalleryUpdateSignal"];
 flickrgallery.app.signal.GalleryUpdateSignal.__super__ = msignal.Signal1;
 flickrgallery.app.signal.GalleryUpdateSignal.prototype = $extend(msignal.Signal1.prototype,{
-	dispatch: function(term) {
-		console.log("Dispatching: " + term.term);
-		msignal.Signal1.prototype.dispatch.call(this,term);
-	}
-	,__class__: flickrgallery.app.signal.GalleryUpdateSignal
+	__class__: flickrgallery.app.signal.GalleryUpdateSignal
 });
 flickrgallery.core = {};
 flickrgallery.core.View = function() {
@@ -1157,14 +1249,28 @@ flickrgallery.app.view.AppView.__super__ = flickrgallery.core.View;
 flickrgallery.app.view.AppView.prototype = $extend(flickrgallery.core.View.prototype,{
 	viewAdded: null
 	,viewRemoved: null
+	,dispatch: function(event,view) {
+		switch(event) {
+		case "added":
+			this.viewAdded(view);
+			break;
+		case "removed":
+			this.viewRemoved(view);
+			break;
+		default:
+			flickrgallery.core.View.prototype.dispatch.call(this,event,view);
+		}
+	}
 	,isAdded: function(view) {
 		return true;
 	}
 	,createViews: function() {
 		var searchBoxView = new flickrgallery.app.view.SearchBoxView();
+		this.addChild(searchBoxView);
 		this.viewAdded(searchBoxView);
 		this.viewAdded(searchBoxView.children[1]);
 		var galleryView = new flickrgallery.app.view.GalleryView();
+		this.addChild(galleryView);
 		this.viewAdded(galleryView);
 		console.log("AppView.createViews");
 	}
@@ -1205,17 +1311,30 @@ flickrgallery.app.view.ButtonView.prototype = $extend(flickrgallery.core.View.pr
 	}
 	,__class__: flickrgallery.app.view.ButtonView
 });
-flickrgallery.app.view.GalleryItemView = function() {
+flickrgallery.app.view.GalleryItemView = function(imgSrc) {
 	this.tagName = "li";
 	flickrgallery.core.View.call(this);
 	this.element.className = "gallery-item";
-	console.log("GalleryItemView.new");
+	this.element.innerHTML = "<img id='img-" + this.id.substring(4,this.id.length) + "' src='" + imgSrc + "' />";
+	this.element.setAttribute("data-favourite","false");
+	this.element.onclick = $bind(this,this.onToggleFavourite);
 };
 $hxClasses["flickrgallery.app.view.GalleryItemView"] = flickrgallery.app.view.GalleryItemView;
 flickrgallery.app.view.GalleryItemView.__name__ = ["flickrgallery","app","view","GalleryItemView"];
+flickrgallery.app.view.GalleryItemView.__interfaces__ = [mmvc.api.IViewContainer];
 flickrgallery.app.view.GalleryItemView.__super__ = flickrgallery.core.View;
 flickrgallery.app.view.GalleryItemView.prototype = $extend(flickrgallery.core.View.prototype,{
-	__class__: flickrgallery.app.view.GalleryItemView
+	viewAdded: null
+	,viewRemoved: null
+	,isAdded: function(view) {
+		return true;
+	}
+	,onToggleFavourite: function(event) {
+		var favouriteStatus = event.target.parentNode.getAttribute("data-favourite");
+		console.log("Dispatching: " + favouriteStatus);
+		this.signal.dispatch(favouriteStatus,this);
+	}
+	,__class__: flickrgallery.app.view.GalleryItemView
 });
 flickrgallery.core.DataView = function(data) {
 	flickrgallery.core.View.call(this);
@@ -3611,13 +3730,18 @@ msignal.SlotList.NIL = new msignal.SlotList(null,null);
 IMap.__meta__ = { obj : { 'interface' : null}};
 mmvc.api.ICommand.__meta__ = { obj : { 'interface' : null}};
 mmvc.impl.Command.__meta__ = { fields : { contextView : { name : ["contextView"], type : ["mmvc.api.IViewContainer"], inject : null}, commandMap : { name : ["commandMap"], type : ["mmvc.api.ICommandMap"], inject : null}, injector : { name : ["injector"], type : ["minject.Injector"], inject : null}, mediatorMap : { name : ["mediatorMap"], type : ["mmvc.api.IMediatorMap"], inject : null}, signal : { name : ["signal"], type : ["msignal.Signal"], inject : null}}};
-flickrgallery.app.command.GalleryUpdateCommand.__meta__ = { fields : { galleryUpdateSignal : { name : ["galleryUpdateSignal"], type : ["flickrgallery.app.signal.GalleryUpdateSignal"], inject : null}, galleryModel : { name : ["galleryModel"], type : ["flickrgallery.app.model.GalleryModel"], inject : null}, flickr : { name : ["flickr"], type : ["flickrgallery.app.api.Flickr"], inject : null}, searchTerm : { name : ["searchTerm"], type : ["flickrgallery.app.model.SearchTerm"], inject : null}}};
+flickrgallery.app.command.GalleryUpdateCommand.__meta__ = { fields : { galleryUpdateSignal : { name : ["galleryUpdateSignal"], type : ["flickrgallery.app.signal.GalleryUpdateSignal"], inject : null}, galleryModel : { name : ["galleryModel"], type : ["flickrgallery.app.model.GalleryModel"], inject : null}, flickr : { name : ["flickr"], type : ["flickrgallery.app.api.Flickr"], inject : null}, searchTerm : { name : ["searchTerm"], type : ["String"], inject : null}}};
 mmvc.api.IContext.__meta__ = { obj : { 'interface' : null}};
 mmvc.api.IMediator.__meta__ = { obj : { 'interface' : null}};
 mmvc.impl.Mediator.__meta__ = { fields : { injector : { name : ["injector"], type : ["minject.Injector"], inject : null}, contextView : { name : ["contextView"], type : ["mmvc.api.IViewContainer"], inject : null}, mediatorMap : { name : ["mediatorMap"], type : ["mmvc.api.IMediatorMap"], inject : null}}};
+flickrgallery.app.mediator.AppViewMediator.__meta__ = { fields : { gallery : { name : ["gallery"], type : ["flickrgallery.app.model.GalleryModel"], inject : null}}};
 flickrgallery.app.mediator.ButtonViewMediator.__meta__ = { fields : { galleryUpdateSignal : { name : ["galleryUpdateSignal"], type : ["flickrgallery.app.signal.GalleryUpdateSignal"], inject : null}}};
+flickrgallery.app.mediator.GalleryItemViewMediator.__meta__ = { fields : { model : { name : ["model"], type : ["flickrgallery.app.model.GalleryItemModel"], inject : null}, collection : { name : ["collection"], type : ["flickrgallery.app.model.GalleryModel"], inject : null}}};
+flickrgallery.app.mediator.GalleryViewMediator.__meta__ = { fields : { collection : { name : ["collection"], type : ["flickrgallery.app.model.GalleryModel"], inject : null}}};
 mdata.Collection.__meta__ = { obj : { 'interface' : null}};
 mdata.List.__meta__ = { obj : { 'interface' : null}};
+flickrgallery.app.model.GalleryItemModel.ADD_FAVOURITE = "ADD_FAVOURITE";
+flickrgallery.app.model.GalleryItemModel.REMOVE_FAVOURITE = "REMOVE_FAVOURITE";
 flickrgallery.core.View.ADDED = "added";
 flickrgallery.core.View.REMOVED = "removed";
 flickrgallery.core.View.ACTIONED = "actioned";

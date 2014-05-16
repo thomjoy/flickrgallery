@@ -1,37 +1,26 @@
 package flickrgallery.app.model;
 
-import haxe.Json;
+import flickrgallery.app.model.GalleryItemModel;
 import msignal.Signal;
-import flickrgallery.app.api.Flickr;
-
-import flickrgallery.app.mediator.ButtonViewMediator;
 
 class GalleryModel extends mdata.ArrayList<GalleryItemModel>
 {
-
-	public var signal:Signal1<Json>;
-
 	public function new(?values:Array<GalleryItemModel>=null)
 	{
 		super(values);
-		//ButtonViewMediator.loadJSONSignal.add(fetch);
 	}
 
-	public function fetch(searchTerm: String)
+	public function createGalleryItems(imgUrls: Array<String>)
 	{
-		// This should be a request to a service, or instainatied somewhere else?
-		var flickr = new Flickr();
-		flickr.search( searchTerm );	
-		flickr.signal.add(processSearch);
+		for( i in 0...imgUrls.length )
+		{
+			this.add( new GalleryItemModel(imgUrls[i]) );
+			trace('adding: ' + imgUrls[i] );
+		}
 	}
 
-	function processSearch(searchResults: haxe.Json)
+	public function getAll()
 	{
-		/*
-			JSON.parse(req.responseText).photos.photo.map(function(p) {
-	        	return '<li><img src=http://farm' + p.farm + '.staticflickr.com/' + p.server + '/' + p.id + '_' + p.secret + '_q.jpg /></li>';
-	        });
-		*/
-		trace(searchResults);
+		return this.source;
 	}
 }

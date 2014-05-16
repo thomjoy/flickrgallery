@@ -2,19 +2,12 @@ package flickrgallery.app.signal;
 
 import msignal.Signal;
 import haxe.Json;
-import flickrgallery.app.model.SearchTerm;
 
-class GalleryUpdateSignal extends msignal.Signal1<SearchTerm>
+class GalleryUpdateSignal extends msignal.Signal1<String>
 {	
 	public function new()
 	{
-		super();
+		super(String);
 		trace('GalleryUpdateSignal.new');
-	}
-
-	override function dispatch(term: SearchTerm)
-	{
-		trace('Dispatching: ' + term.term);
-		super.dispatch(term);
 	}
 }

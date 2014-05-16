@@ -23,7 +23,6 @@ class GalleryView extends DataView<GalleryItemView> implements mmvc.api.IViewCon
 	{
 		tagName = "ul";
 		super();
-		//element.className = "container";
 		element.setAttribute("id", "gallery");
 		trace('GalleryView.new');
 	}
