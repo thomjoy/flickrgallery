@@ -48,7 +48,6 @@ class GalleryUpdateCommand extends mmvc.impl.Command
 				var url = "http://farm" + farm + ".staticflickr.com/" + server + "/" + id + "_" + secret + "_n.jpg";
 				
 				var model = new GalleryItemModel(id, url);
-				trace(model);
 				resultArray.push(model);
 			}
 

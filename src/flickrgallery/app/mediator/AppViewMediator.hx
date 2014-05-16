@@ -16,8 +16,8 @@ class AppViewMediator extends mmvc.impl.Mediator<AppView>
 	@inject 
 	public var gallery: GalleryModel;
 
-	//@inject
-	//public var favourites: FavouritesModel;
+	@inject
+	public var favourites: FavouritesModel;
 
 	public function new()
 	{
@@ -33,14 +33,15 @@ class AppViewMediator extends mmvc.impl.Mediator<AppView>
 		super.onRegister();
 		view.createViews();
 
-		//mediate(this.gallery.signal.add(onGalleryChange));
-		//mediate(this.favourites.signal.add(onFavouritesChange));
+		//mediate(gallery.signal.add(onGalleryChange));
+		//mediate(favourites.signal.add(onFavouritesChange));
 		trace('AppViewMediator.onRegister');
 	}
 
-	public function onGalleryChange(event:String)
+	// Id is the imgId of the model
+	public function onGalleryChange(id: String, event:String)
 	{
-		return true;
+		trace(id + " : " + event);
 	}
 
 	public function onFavouritesChange(event:String)

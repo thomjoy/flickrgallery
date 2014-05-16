@@ -6,6 +6,7 @@ import flickrgallery.core.View;
 // subviews
 import flickrgallery.app.view.GalleryView;
 import flickrgallery.app.view.SearchBoxView;
+import flickrgallery.app.view.FavouritesView;
 
 import js.Lib;
 import js.Browser;
@@ -60,9 +61,13 @@ class AppView extends View implements mmvc.api.IViewContainer
 		// trying to add the button view to the context
 		this.viewAdded(searchBoxView.children[1]);
 		
-		var galleryView = new GalleryView();
+		var galleryView = new GalleryView('gallery');
 		addChild(galleryView);
 		this.viewAdded(galleryView);
+
+		var favouritesView = new FavouritesView('favourites');
+		addChild(favouritesView);
+		this.viewAdded(favouritesView);
 
 		trace('AppView.createViews');
 	}

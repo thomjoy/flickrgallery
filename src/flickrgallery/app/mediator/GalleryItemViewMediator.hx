@@ -25,17 +25,14 @@ class GalleryItemViewMediator extends mmvc.impl.Mediator<GalleryItemView>
 		super.onRegister();
 
 		mediate(view.signal.add(onClick));
-		trace('GalleryViewMediator.onRegister');
+		//trace('GalleryViewMediator.onRegister');
 	}
 
 	public function onClick(status: String, view: View)
 	{	
-		// update the status of the model
-		trace('updateFavouriteHandler:' + status);
-
+		// update the favourite status of the model
 		var castStatus:Bool = (status == "false" ? false : true);
 		var imgId = untyped __js__('view.element.getAttribute("data-img-id")');
-
 		collection.findByImgId(imgId).toggleFavourite(castStatus);
 	}
 }

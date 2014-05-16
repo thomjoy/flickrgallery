@@ -36,6 +36,7 @@ class AppContext extends mmvc.impl.Context
 
 		// Gallery Model
 		injector.mapSingleton(GalleryModel);
+		injector.mapSingleton(FavouritesModel);
 
 		// Gallery Item Models
 		injector.mapClass(GalleryItemModel, GalleryItemModel);
@@ -47,6 +48,7 @@ class AppContext extends mmvc.impl.Context
 		mediatorMap.mapView(GalleryView, GalleryViewMediator);
 		mediatorMap.mapView(SearchBoxView, SearchBoxViewMediator);
 		mediatorMap.mapView(ButtonView, ButtonViewMediator);
+		mediatorMap.mapView(FavouritesView, FavouritesViewMediator);
 
 		// Dynamically added
 		mediatorMap.mapView(GalleryItemView, GalleryItemViewMediator);

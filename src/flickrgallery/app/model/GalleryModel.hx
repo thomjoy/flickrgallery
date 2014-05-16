@@ -29,4 +29,19 @@ class GalleryModel extends mdata.ArrayList<GalleryItemModel>
 
 		return null;
 	}
+
+	public function getFavourites():Array<GalleryItemModel>
+	{
+		var results = [];
+
+		for( model in this.source )
+		{
+			if( model.favourite == true ) 
+			{
+				results.push(model);
+			}
+		}
+
+		return results;
+	}
 }

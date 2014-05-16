@@ -10,7 +10,7 @@ class GalleryItemModel
 	public var url:String;
 	public var favourite:Bool;
 
-	public var signal:Signal1<String>;
+	public var signal:Signal2<String, String>;
 
 	inline public static var ADD_FAVOURITE = 'ADD_FAVOURITE';
 	inline public static var REMOVE_FAVOURITE = 'REMOVE_FAVOURITE';
@@ -21,7 +21,7 @@ class GalleryItemModel
 		this.url = url;
 		this.favourite = false;
 
-		this.signal = new Signal1<String>();
+		this.signal = new Signal2<String, String>();
 	}
 
 	public function toggleFavourite(oldStatus: Bool)
@@ -29,7 +29,7 @@ class GalleryItemModel
 		favourite = !oldStatus;
 
 		var action = favourite ? GalleryItemModel.ADD_FAVOURITE :  GalleryItemModel.REMOVE_FAVOURITE;
-		//signal.dispatch( action );
+		signal.dispatch( id, action );
 
 		trace(action);
 	}
