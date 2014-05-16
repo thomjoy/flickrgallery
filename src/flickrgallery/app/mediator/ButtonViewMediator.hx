@@ -1,14 +1,13 @@
 package flickrgallery.app.mediator;
 
 import flickrgallery.app.view.ButtonView;
-import flickrgallery.app.signal.Search;
-
-import flickrgallery.app.api.Flickr;
-import haxe.Json;
+import flickrgallery.app.signal.GalleryUpdateSignal;
+import flickrgallery.app.model.SearchTerm;
 
 class ButtonViewMediator extends mmvc.impl.Mediator<ButtonView>
 {
-	@inject public var FlickrSearch:Search;
+	@inject
+	public var galleryUpdateSignal: GalleryUpdateSignal;
 
 	public function new()
 	{
@@ -18,6 +17,8 @@ class ButtonViewMediator extends mmvc.impl.Mediator<ButtonView>
 	override function onRegister()
 	{
 		super.onRegister();
+
+		// add listeners
 		mediate(this.view.clickSignal.add(searchHandler));
 	}
 
@@ -30,21 +31,8 @@ class ButtonViewMediator extends mmvc.impl.Mediator<ButtonView>
 	{
 		if(event == ButtonView.DO_SEARCH)
 		{
-			// This should be a request to a service, or instainatied somewhere else?
-			var f = new Flickr();
-			f.search( searchTerm );	
-			f.signal.add(processSearch);
+			// Inform the Gallery model to fetch images.
+			galleryUpdateSignal.dispatch( new SearchTerm(searchTerm) );
 		}
-
-	}
-	
-	function processSearch(searchResults: haxe.Json)
-	{
-		/*
-			JSON.parse(req.responseText).photos.photo.map(function(p) {
-	        	return '<li><img src=http://farm' + p.farm + '.staticflickr.com/' + p.server + '/' + p.id + '_' + p.secret + '_q.jpg /></li>';
-	        });
-		*/
-		trace(searchResults.photos);
 	}
 }

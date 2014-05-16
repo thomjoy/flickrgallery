@@ -1,6 +1,6 @@
 package flickrgallery.app.model;
 
-class GalleryItem
+class GalleryItemModel
 {
 	public var id:String;
 	public var favourite:Bool;

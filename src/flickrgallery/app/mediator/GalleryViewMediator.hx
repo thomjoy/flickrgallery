@@ -9,10 +9,6 @@ class GalleryViewMediator extends mmvc.impl.Mediator<GalleryView>
 		super();
 	}
 
-	/**
-	Context has now been initialized. Time to create the rest of the main views in the application
-	@see mmvc.impl.Mediator.onRegister()
-	*/
 	override function onRegister()
 	{
 		super.onRegister();
@@ -20,9 +16,6 @@ class GalleryViewMediator extends mmvc.impl.Mediator<GalleryView>
 		trace('GalleryViewMediator.onRegister');
 	}
 
-	/**
-	@see mmvc.impl.Mediator
-	*/
 	override public function onRemove():Void
 	{
 		super.onRemove();

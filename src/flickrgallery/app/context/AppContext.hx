@@ -13,8 +13,8 @@ import flickrgallery.app.mediator.*;
 import flickrgallery.app.model.*;
 
 // Command
-import flickrgallery.app.signal.Search;
-import flickrgallery.app.command.SearchCommand;
+import flickrgallery.app.signal.GalleryUpdateSignal;
+import flickrgallery.app.command.GalleryUpdateCommand;
 
 class AppContext extends mmvc.impl.Context
 {
@@ -35,16 +35,16 @@ class AppContext extends mmvc.impl.Context
 		injector.mapSingleton(Flickr);
 
 		// Gallery Model
-		injector.mapSingleton(Gallery);
+		injector.mapSingleton(GalleryModel);
+
+		// map Signals -> Commands
+		commandMap.mapSignalClass(GalleryUpdateSignal, GalleryUpdateCommand);
 
 		// Subviews
 		mediatorMap.mapView(GalleryView, GalleryViewMediator);
 		mediatorMap.mapView(GalleryItemView, GalleryViewMediator);
 		mediatorMap.mapView(SearchBoxView, SearchBoxViewMediator);
 		mediatorMap.mapView(ButtonView, ButtonViewMediator);
-
-		// map Signals -> Commands
-		commandMap.mapSignalClass(Search, SearchCommand);
 
 		// wiring for main application module
 		mediatorMap.mapView(AppView, AppViewMediator);

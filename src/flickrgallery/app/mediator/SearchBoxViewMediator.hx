@@ -9,7 +9,6 @@ class SearchBoxViewMediator extends mmvc.impl.Mediator<SearchBoxView>
 		super();
 	}
 
-	
 	override function onRegister()
 	{
 		super.onRegister();

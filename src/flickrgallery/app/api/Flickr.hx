@@ -4,7 +4,6 @@ import mloader.Loader;
 import mloader.JsonLoader;
 
 import msignal.Signal;
-
 import haxe.Json;
 
 class Flickr
@@ -20,15 +19,15 @@ class Flickr
 		this.signal = new Signal1<Json>();
 	}
 
-	public function createUrl(method: String, params: String)
+	public function createUrl(method: String, param: String)
 	{
 		return "https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" +
-				this.API_KEY + "&tags=cats" + "&format=json&nojsoncallback=1";
+				this.API_KEY + "&tags=" + param + "&format=json&nojsoncallback=1";
 	}
 
-	public function makeRequest(method: String, params: String)
+	public function makeRequest(method: String, param: String)
 	{
-		var loader = new JsonLoader(this.createUrl(method, params));
+		var loader = new JsonLoader(this.createUrl(method, param));
 		loader.loaded.add(onLoadedContent);
 		loader.load();
 	}
@@ -49,7 +48,6 @@ class Flickr
 		}
 	}
 
-	// Methods
 	public function search(searchTerm: String)
 	{
 		return this.makeRequest("search", searchTerm);
