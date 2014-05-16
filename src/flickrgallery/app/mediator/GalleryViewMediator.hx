@@ -41,7 +41,7 @@ class GalleryViewMediator extends mmvc.impl.Mediator<GalleryView>
 			{
 				for( galleryItem in collection.getAll() )
 				{
-					var itemView = new GalleryItemView(galleryItem.url);
+					var itemView = new GalleryItemView(galleryItem.id, galleryItem.url);
 					view.addChild(itemView);
 				}
 			}

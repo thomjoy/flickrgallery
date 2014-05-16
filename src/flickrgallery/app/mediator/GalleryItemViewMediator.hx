@@ -5,6 +5,8 @@ import flickrgallery.app.model.GalleryItemModel;
 import flickrgallery.app.model.GalleryModel;
 import flickrgallery.core.View;
 
+using mdata.Collections;
+
 class GalleryItemViewMediator extends mmvc.impl.Mediator<GalleryItemView>
 {
 	@inject 
@@ -32,8 +34,8 @@ class GalleryItemViewMediator extends mmvc.impl.Mediator<GalleryItemView>
 		trace('updateFavouriteHandler:' + status);
 
 		var castStatus:Bool = (status == "false" ? false : true);
-		var modelId = Std.parseInt(view.id.substring(4, view.id.length));
-		(collection.get(modelId - 1)).toggleFavourite(castStatus);
-		
+		var imgId = untyped __js__('view.element.getAttribute("data-img-id")');
+
+		collection.findByImgId(imgId).toggleFavourite(castStatus);
 	}
 }

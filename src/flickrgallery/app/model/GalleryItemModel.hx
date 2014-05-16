@@ -2,8 +2,11 @@ package flickrgallery.app.model;
 
 import msignal.Signal;
 
+using mdata.Collections;
+
 class GalleryItemModel 
 {
+	public var id:String;
 	public var url:String;
 	public var favourite:Bool;
 
@@ -12,8 +15,9 @@ class GalleryItemModel
 	inline public static var ADD_FAVOURITE = 'ADD_FAVOURITE';
 	inline public static var REMOVE_FAVOURITE = 'REMOVE_FAVOURITE';
 
-	public function new(url:String)
+	public function new(id: String, url:String)
 	{
+		this.id = id;
 		this.url = url;
 		this.favourite = false;
 
@@ -25,6 +29,8 @@ class GalleryItemModel
 		favourite = !oldStatus;
 
 		var action = favourite ? GalleryItemModel.ADD_FAVOURITE :  GalleryItemModel.REMOVE_FAVOURITE;
-		signal.dispatch( action );
+		//signal.dispatch( action );
+
+		trace(action);
 	}
 }

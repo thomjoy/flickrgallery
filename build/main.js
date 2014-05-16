@@ -9,11 +9,6 @@ function $extend(from, fields) {
 var HxOverrides = function() { };
 $hxClasses["HxOverrides"] = HxOverrides;
 HxOverrides.__name__ = ["HxOverrides"];
-HxOverrides.cca = function(s,index) {
-	var x = s.charCodeAt(index);
-	if(x != x) return undefined;
-	return x;
-};
 HxOverrides.substr = function(s,pos,len) {
 	if(pos != null && pos != 0 && len != null && len < 0) return "";
 	if(len == null) len = s.length;
@@ -182,12 +177,6 @@ $hxClasses["Std"] = Std;
 Std.__name__ = ["Std"];
 Std.string = function(s) {
 	return js.Boot.__string_rec(s,"");
-};
-Std.parseInt = function(x) {
-	var v = parseInt(x,10);
-	if(v == 0 && (HxOverrides.cca(x,1) == 120 || HxOverrides.cca(x,1) == 88)) v = parseInt(x);
-	if(isNaN(v)) return null;
-	return v;
 };
 Std.random = function(x) {
 	if(x <= 0) return 0; else return Math.floor(Math.random() * x);
@@ -404,15 +393,12 @@ flickrgallery.app.command.GalleryUpdateCommand.prototype = $extend(mmvc.impl.Com
 				var id = Reflect.field(photo,"id");
 				var secret = Reflect.field(photo,"secret");
 				var url = "http://farm" + farm + ".staticflickr.com/" + server + "/" + id + "_" + secret + "_n.jpg";
-				var model = new flickrgallery.app.model.GalleryItemModel(url);
+				var model = new flickrgallery.app.model.GalleryItemModel(id,url);
 				console.log(model);
 				resultArray.push(model);
 			}
-			console.log(this.galleryModel.get_length());
 			this.galleryModel.clear();
-			console.log(this.galleryModel.get_length());
 			this.galleryModel.addAll(resultArray);
-			console.log(this.galleryModel.get_length());
 		}
 	}
 	,__class__: flickrgallery.app.command.GalleryUpdateCommand
@@ -650,9 +636,8 @@ flickrgallery.app.mediator.GalleryItemViewMediator.prototype = $extend(mmvc.impl
 		console.log("updateFavouriteHandler:" + status);
 		var castStatus;
 		if(status == "false") castStatus = false; else castStatus = true;
-		var modelId = Std.parseInt(view.id.substring(4,view.id.length));
-		console.log(modelId);
-		this.collection.get(modelId - 1).toggleFavourite(castStatus);
+		var imgId = view.element.getAttribute("data-img-id");
+		this.collection.findByImgId(imgId).toggleFavourite(castStatus);
 	}
 	,__class__: flickrgallery.app.mediator.GalleryItemViewMediator
 });
@@ -683,7 +668,7 @@ flickrgallery.app.mediator.GalleryViewMediator.prototype = $extend(mmvc.impl.Med
 			while(_g1 < _g2.length) {
 				var galleryItem = _g2[_g1];
 				++_g1;
-				var itemView = new flickrgallery.app.view.GalleryItemView(galleryItem.url);
+				var itemView = new flickrgallery.app.view.GalleryItemView(galleryItem.id,galleryItem.url);
 				this.view.addChild(itemView);
 			}
 			break;
@@ -1013,17 +998,18 @@ $hxClasses["flickrgallery.app.model.GalleryModel"] = flickrgallery.app.model.Gal
 flickrgallery.app.model.GalleryModel.__name__ = ["flickrgallery","app","model","GalleryModel"];
 flickrgallery.app.model.GalleryModel.__super__ = mdata.ArrayList;
 flickrgallery.app.model.GalleryModel.prototype = $extend(mdata.ArrayList.prototype,{
-	createGalleryItems: function(imgUrls) {
-		var _g1 = 0;
-		var _g = imgUrls.length;
-		while(_g1 < _g) {
-			var i = _g1++;
-			this.add(new flickrgallery.app.model.GalleryItemModel(imgUrls[i]));
-			console.log("adding: " + imgUrls[i]);
-		}
-	}
-	,getAll: function() {
+	getAll: function() {
 		return this.source;
+	}
+	,findByImgId: function(id) {
+		var _g = 0;
+		var _g1 = this.source;
+		while(_g < _g1.length) {
+			var model = _g1[_g];
+			++_g;
+			if(model.id == id) return model;
+		}
+		return null;
 	}
 	,__class__: flickrgallery.app.model.GalleryModel
 });
@@ -1036,7 +1022,8 @@ flickrgallery.app.model.FavouritesModel.__super__ = flickrgallery.app.model.Gall
 flickrgallery.app.model.FavouritesModel.prototype = $extend(flickrgallery.app.model.GalleryModel.prototype,{
 	__class__: flickrgallery.app.model.FavouritesModel
 });
-flickrgallery.app.model.GalleryItemModel = function(url) {
+flickrgallery.app.model.GalleryItemModel = function(id,url) {
+	this.id = id;
 	this.url = url;
 	this.favourite = false;
 	this.signal = new msignal.Signal1();
@@ -1044,14 +1031,15 @@ flickrgallery.app.model.GalleryItemModel = function(url) {
 $hxClasses["flickrgallery.app.model.GalleryItemModel"] = flickrgallery.app.model.GalleryItemModel;
 flickrgallery.app.model.GalleryItemModel.__name__ = ["flickrgallery","app","model","GalleryItemModel"];
 flickrgallery.app.model.GalleryItemModel.prototype = {
-	url: null
+	id: null
+	,url: null
 	,favourite: null
 	,signal: null
 	,toggleFavourite: function(oldStatus) {
 		this.favourite = !oldStatus;
 		var action;
 		if(this.favourite) action = "ADD_FAVOURITE"; else action = "REMOVE_FAVOURITE";
-		this.signal.dispatch(action);
+		console.log(action);
 	}
 	,__class__: flickrgallery.app.model.GalleryItemModel
 };
@@ -1311,12 +1299,13 @@ flickrgallery.app.view.ButtonView.prototype = $extend(flickrgallery.core.View.pr
 	}
 	,__class__: flickrgallery.app.view.ButtonView
 });
-flickrgallery.app.view.GalleryItemView = function(imgSrc) {
+flickrgallery.app.view.GalleryItemView = function(imgId,imgSrc) {
 	this.tagName = "li";
 	flickrgallery.core.View.call(this);
 	this.element.className = "gallery-item";
-	this.element.innerHTML = "<img id='img-" + this.id.substring(4,this.id.length) + "' src='" + imgSrc + "' />";
+	this.element.innerHTML = "<img id='img-" + imgId + "' src='" + imgSrc + "' />";
 	this.element.setAttribute("data-favourite","false");
+	this.element.setAttribute("data-img-id",imgId);
 	this.element.onclick = $bind(this,this.onToggleFavourite);
 };
 $hxClasses["flickrgallery.app.view.GalleryItemView"] = flickrgallery.app.view.GalleryItemView;
@@ -1331,7 +1320,10 @@ flickrgallery.app.view.GalleryItemView.prototype = $extend(flickrgallery.core.Vi
 	}
 	,onToggleFavourite: function(event) {
 		var favouriteStatus = event.target.parentNode.getAttribute("data-favourite");
-		console.log("Dispatching: " + favouriteStatus);
+		 
+			var b = event.target.parentNode.getAttribute("data-favourite");
+			var n = b == "true" ? "false" : "true";
+			event.target.parentNode.setAttribute("data-favourite", n);
 		this.signal.dispatch(favouriteStatus,this);
 	}
 	,__class__: flickrgallery.app.view.GalleryItemView
@@ -1796,6 +1788,16 @@ mcore.exception.ArgumentException.__super__ = mcore.exception.Exception;
 mcore.exception.ArgumentException.prototype = $extend(mcore.exception.Exception.prototype,{
 	__class__: mcore.exception.ArgumentException
 });
+mcore.exception.NotFoundException = function(message,cause,info) {
+	if(message == null) message = "";
+	mcore.exception.Exception.call(this,message,cause,info);
+};
+$hxClasses["mcore.exception.NotFoundException"] = mcore.exception.NotFoundException;
+mcore.exception.NotFoundException.__name__ = ["mcore","exception","NotFoundException"];
+mcore.exception.NotFoundException.__super__ = mcore.exception.Exception;
+mcore.exception.NotFoundException.prototype = $extend(mcore.exception.Exception.prototype,{
+	__class__: mcore.exception.NotFoundException
+});
 mcore.exception.RangeException = function(message,cause,info) {
 	if(message == null) message = "";
 	mcore.exception.Exception.call(this,message,cause,info);
@@ -1997,6 +1999,70 @@ mdata.CollectionEventType = { __ename__ : true, __constructs__ : ["Add","Remove"
 mdata.CollectionEventType.Add = function(items) { var $x = ["Add",0,items]; $x.__enum__ = mdata.CollectionEventType; $x.toString = $estr; return $x; };
 mdata.CollectionEventType.Remove = function(items) { var $x = ["Remove",1,items]; $x.__enum__ = mdata.CollectionEventType; $x.toString = $estr; return $x; };
 mdata.CollectionEventType.Replace = function(items) { var $x = ["Replace",2,items]; $x.__enum__ = mdata.CollectionEventType; $x.toString = $estr; return $x; };
+mdata.Collections = function() {
+};
+$hxClasses["mdata.Collections"] = mdata.Collections;
+mdata.Collections.__name__ = ["mdata","Collections"];
+mdata.Collections.filter = function(collection,predicate) {
+	var removedValues = [];
+	var $it0 = collection.iterator();
+	while( $it0.hasNext() ) {
+		var item = $it0.next();
+		if(!predicate(item)) removedValues.push(item);
+	}
+	collection.removeAll(removedValues);
+};
+mdata.Collections.copy = function(collection) {
+	var type = Type.getClass(collection);
+	var slist = null;
+	if(type == mdata.SelectableList) {
+		slist = collection;
+		type = Type.getClass(slist.source);
+	}
+	var copy = null;
+	copy = Type.createInstance(type,[]);
+	copy.addAll(collection.toArray());
+	if(slist != null) copy = new mdata.SelectableList(copy);
+	return copy;
+};
+mdata.Collections.sort = function(list,comparator) {
+	if(comparator == null) comparator = mdata.Collections.DEFAULT_COMPARATOR;
+	if(!list.get_eventsEnabled() && Object.prototype.hasOwnProperty.call(list,"source") && ((list.source instanceof Array) && list.source.__enum__ == null)) list.source.sort(comparator); else {
+		var array = list.toArray();
+		array.sort(comparator);
+		list.setAll(0,array);
+	}
+};
+mdata.Collections.DEFAULT_COMPARATOR = function(a,b) {
+	if(a > b) return 1;
+	if(a < b) return -1;
+	return 0;
+};
+mdata.Collections.binarySearch = function(list,needle,comparator) {
+	if(comparator == null) comparator = mdata.Collections.DEFAULT_COMPARATOR;
+	var min = 0;
+	var max = list.get_length() - 1;
+	while(min <= max) {
+		var mid = min + max >>> 1;
+		var cmp = comparator(list.get(mid),needle);
+		if(cmp < 0) min = mid + 1; else if(cmp > 0) max = mid - 1; else return mid;
+	}
+	return -1;
+};
+mdata.Collections.reverse = function(list) {
+	if(!list.get_eventsEnabled() && Object.prototype.hasOwnProperty.call(list,"source") && ((list.source instanceof Array) && list.source.__enum__ == null)) list.source.reverse(); else {
+		var a = list.toArray();
+		a.reverse();
+		list.setAll(0,a);
+	}
+};
+mdata.Collections.shuffle = function(list) {
+	var a = mcore.util.Arrays.shuffle(list.toArray());
+	list.setAll(0,a);
+};
+mdata.Collections.prototype = {
+	__class__: mdata.Collections
+};
 mdata.Dictionary = function(weakKeys) {
 	if(weakKeys == null) weakKeys = false;
 	this.weakKeys = weakKeys;
@@ -2110,6 +2176,146 @@ mdata.ListEvent.prototype = $extend(msignal.Event.prototype,{
 	location: null
 	,__class__: mdata.ListEvent
 });
+mdata.SelectableList = function(list,selectedIndex) {
+	if(selectedIndex == null) selectedIndex = 0;
+	if(list == null) list = new mdata.ArrayList();
+	this.source = list;
+	this.source.get_changed().addWithPriority($bind(this,this.source_changed),1000);
+	this.selectionChanged = new msignal.Signal1(mdata.SelectableList);
+	this.set_selectedIndex(list.get_size() > 0?selectedIndex:-1);
+	this.previousSelectedIndex = -1;
+};
+$hxClasses["mdata.SelectableList"] = mdata.SelectableList;
+mdata.SelectableList.__name__ = ["mdata","SelectableList"];
+mdata.SelectableList.__interfaces__ = [mdata.List];
+mdata.SelectableList.prototype = {
+	changed: null
+	,get_changed: function() {
+		return this.source.get_changed();
+	}
+	,get_eventsEnabled: function() {
+		return this.source.get_eventsEnabled();
+	}
+	,set_eventsEnabled: function(value) {
+		return this.source.set_eventsEnabled(value);
+	}
+	,size: null
+	,get_size: function() {
+		return this.source.get_size();
+	}
+	,first: null
+	,get_first: function() {
+		return this.source.get_first();
+	}
+	,last: null
+	,get_last: function() {
+		return this.source.get_last();
+	}
+	,length: null
+	,get_length: function() {
+		return this.source.get_length();
+	}
+	,selectionChanged: null
+	,previousSelectedIndex: null
+	,source: null
+	,source_changed: function(e) {
+		if(this.source.get_size() == 0 && this.selectedIndex != -1) this.previousSelectedIndex = this.set_selectedIndex(-1); else if(this.source.get_size() > 0 && this.selectedIndex == -1) {
+			this.previousSelectedIndex = this.selectedIndex;
+			this.set_selectedIndex(0);
+		}
+	}
+	,selectedIndex: null
+	,set_selectedIndex: function(value) {
+		var s = this.source.get_size();
+		if(value >= s || s == 0 && value != -1 || s > 0 && value < 0) throw mcore.exception.RangeException.numeric(value,0,this.get_size());
+		if(value != this.selectedIndex) {
+			this.previousSelectedIndex = this.selectedIndex;
+			this.selectedIndex = value;
+			if(this.get_eventsEnabled()) this.selectionChanged.dispatch(this);
+		}
+		return this.selectedIndex;
+	}
+	,get_selectedItem: function() {
+		return this.source.get(this.selectedIndex);
+	}
+	,set_selectedItem: function(value) {
+		if(!this.source.contains(value)) throw new mcore.exception.NotFoundException("Value was not found in List: " + Std.string(value),null,{ fileName : "SelectableList.hx", lineNumber : 169, className : "mdata.SelectableList", methodName : "set_selectedItem"});
+		this.set_selectedIndex(this.source.indexOf(value));
+		return value;
+	}
+	,add: function(value) {
+		this.source.add(value);
+		if(this.selectedIndex == -1) this.set_selectedIndex(0);
+	}
+	,addAll: function(values) {
+		this.source.addAll(values);
+		if(this.selectedIndex == -1 && this.source.get_size() > 0) this.set_selectedIndex(0);
+	}
+	,insert: function(index,value) {
+		this.source.insert(index,value);
+		if(this.selectedIndex == -1 && this.source.get_size() > 0) this.set_selectedIndex(0);
+	}
+	,insertAll: function(index,values) {
+		this.source.insertAll(index,values);
+		if(this.selectedIndex == -1 && this.source.get_size() > 0) this.set_selectedIndex(0);
+	}
+	,clear: function() {
+		this.source.clear();
+		this.set_selectedIndex(-1);
+	}
+	,remove: function(value) {
+		var result = this.source.remove(value);
+		if(this.selectedIndex >= this.source.get_size()) this.set_selectedIndex(this.source.get_size() - 1);
+		return result;
+	}
+	,removeAt: function(index) {
+		var result = this.source.removeAt(index);
+		if(this.selectedIndex >= this.get_size()) this.set_selectedIndex(this.get_size() - 1);
+		return result;
+	}
+	,removeRange: function(startIndex,endIndex) {
+		var result = this.source.removeRange(startIndex,endIndex);
+		if(this.selectedIndex >= this.get_size()) this.set_selectedIndex(this.get_size() - 1);
+		return result;
+	}
+	,removeAll: function(values) {
+		var result = this.source.removeAll(values);
+		if(this.selectedIndex >= this.get_size()) this.set_selectedIndex(this.get_size() - 1);
+		return result;
+	}
+	,set: function(index,value) {
+		return this.source.set(index,value);
+	}
+	,setAll: function(index,values) {
+		return this.source.setAll(index,values);
+	}
+	,get: function(index) {
+		return this.source.get(index);
+	}
+	,indexOf: function(value) {
+		return this.source.indexOf(value);
+	}
+	,lastIndexOf: function(value) {
+		return this.source.lastIndexOf(value);
+	}
+	,contains: function(value) {
+		return this.source.contains(value);
+	}
+	,isEmpty: function() {
+		return this.source.isEmpty();
+	}
+	,iterator: function() {
+		return this.source.iterator();
+	}
+	,toArray: function() {
+		return this.source.toArray();
+	}
+	,toString: function() {
+		return this.source.toString();
+	}
+	,__class__: mdata.SelectableList
+	,__properties__: {set_selectedItem:"set_selectedItem",get_selectedItem:"get_selectedItem",set_selectedIndex:"set_selectedIndex",get_length:"get_length",get_last:"get_last",get_first:"get_first",get_size:"get_size",set_eventsEnabled:"set_eventsEnabled",get_eventsEnabled:"get_eventsEnabled",get_changed:"get_changed"}
+};
 var minject = {};
 minject.InjectionConfig = function(request,injectionName) {
 	this.request = request;
