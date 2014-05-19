@@ -37,6 +37,7 @@ class GalleryItemViewMediator extends mmvc.impl.Mediator<GalleryItemView>
 		// update the favourite status of the model
 		var castStatus:Bool = (status == "false" ? false : true);
 		var imgId = untyped __js__('view.element.getAttribute("data-img-id")');
+		
 		collection.findByImgId(imgId).toggleFavourite(castStatus);
 		
 		// fix, change this to use a proper interface

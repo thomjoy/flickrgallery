@@ -9,12 +9,12 @@ class FavouritesModel extends GalleryModel
   @inject
   public var galleryModel:GalleryModel;
 
-  public var signal: Signal1<String>;
+  public var signal: Signal2<String, String>;
 
 	public function new(?values:Array<GalleryItemModel>=null)
 	{
 		super(values);
-    this.signal = new Signal1<String>();
+    this.signal = new Signal2<String,String>();
 	}
 
   public function refresh()
@@ -39,7 +39,6 @@ class FavouritesModel extends GalleryModel
     if( status == true )
     {
       this.add( imgModel );
-      signal.dispatch(imgModel.url);
       trace('Add to favourites');
     }
     else
@@ -47,5 +46,10 @@ class FavouritesModel extends GalleryModel
       this.remove( galleryModel.findByImgId(imgId) );
       trace('Remove from favourites');
     }
+
+    var strStatus = status ? "Add" : "Remove";
+
+    signal.dispatch(imgModel.id, strStatus);
+    trace(this.length + " items in favourites");
   }
 }

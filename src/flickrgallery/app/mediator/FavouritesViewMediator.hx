@@ -4,17 +4,11 @@ import flickrgallery.app.view.FavouritesView;
 import flickrgallery.app.view.GalleryItemView;
 
 import flickrgallery.app.model.FavouritesModel;
-import flickrgallery.app.model.GalleryModel;
-
-import mdata.*;
 
 class FavouritesViewMediator extends mmvc.impl.Mediator<FavouritesView>
 {
 	@inject 
 	public var collection: FavouritesModel;
-
-	@inject
-	public var gallery: GalleryModel;
 
 	public function new()
 	{
@@ -24,35 +18,45 @@ class FavouritesViewMediator extends mmvc.impl.Mediator<FavouritesView>
 	override function onRegister()
 	{
 		super.onRegister();
-		
-		mediate(collection.changed.add(onGalleryUpdate));
-		trace('GalleryViewMediator.onRegister');
+	
+		// when the collection changes, update the view
+		mediate(collection.signal.add(onUpdate));
 	}
 
 	override public function onRemove():Void
 	{
 		super.onRemove();
-		trace('GalleryViewMediator.onRemove');
 	}
 
-	// Fix the typing here by firing the event with the proper parameters
-	public function onGalleryUpdate(event:Dynamic)
+	// Use our custom list event due to the need to do a bunch of view related stuff
+	public function onUpdate(id:String, action:String)
 	{
-		switch(event.type[0])
+		switch(action)
 		{
 			case "Add":
 			{
-				for( galleryItem in gallery.getFavourites() )
-				{
-					var itemView = new GalleryItemView(galleryItem.id, galleryItem.url);
-					view.addChild(itemView);
-				}
+				var fave = collection.findByImgId( id );
+				var itemView = new GalleryItemView(fave.id, fave.url);
+				view.addChild(itemView);
 			}
 
 			case "Remove":
 			{
-				trace('Remove the old subviews');
+				var children = view.getChildren();
+				for( child in children )
+				{
+					trace( child );
+					if( js.Browser.document.getElementById(child.id).getAttribute('data-img-id') == id )
+					{
+						trace("Remove");
+						view.removeChild( child );
+					}
+				}
 			}
 		}
+
+		var elem = (js.Browser.document.getElementById('favourites-status'));
+		var str = collection.length == 0 ? "No favourites" : collection.length + " favourites";
+		elem.innerHTML = str;
 	}
 }

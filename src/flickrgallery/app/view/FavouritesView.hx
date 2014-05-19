@@ -1,6 +1,7 @@
 package flickrgallery.app.view;
 
 import flickrgallery.app.view.GalleryView;
+import js.Browser;
 
 class FavouritesView extends GalleryView
 {
@@ -9,22 +10,17 @@ class FavouritesView extends GalleryView
 		tagName = "ul";
 		super(htmlId);
 		element.setAttribute("id", htmlId);
+
+		var status = Browser.document.createElement("div");
+		status.setAttribute("id", "favourites-status");
+		status.className = "";
+		element.appendChild(status);
+		
 		trace('FavouritesView.new');
-	}
-
-	override function createViews()
-	{
-		trace('FavouritesView.createViews');
-	}
-
-	override function update()
-	{
-		trace('here');
 	}
 
 	override function initialize()
 	{
 		super.initialize();
-		js.Browser.document.getElementById('favourites-container').appendChild(element);
 	}
 }

@@ -24,31 +24,12 @@ class AppViewMediator extends mmvc.impl.Mediator<AppView>
 		super();
 	}
 
-	/**
-	Context has now been initialized. Time to create the rest of the main views in the application
-	@see mmvc.impl.Mediator.onRegister()
-	*/
 	override function onRegister()
 	{
 		super.onRegister();
 		view.createViews();
 
-		//mediate(gallery.signal.add(onGalleryChange));
-		mediate(favourites.signal.add(onFavouritesChange));
 		trace('AppViewMediator.onRegister');
-	}
-
-	// Id is the imgId of the model
-	public function onGalleryChange(id: String, event:String)
-	{
-		trace(id + " : " + event);
-	}
-
-	public function onFavouritesChange(event:String)
-	{
-		trace('onFavouritesChange');
-		trace(event);
-		favourites.refresh();
 	}
 
 	override public function onRemove():Void

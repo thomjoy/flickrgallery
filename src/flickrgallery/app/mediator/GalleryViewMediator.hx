@@ -52,6 +52,8 @@ class GalleryViewMediator extends mmvc.impl.Mediator<GalleryView>
 				{
 					view.removeChild(galleryItem);
 				}
+
+				trace(this.view.getChildren().length);
 			}
 		}
 	}

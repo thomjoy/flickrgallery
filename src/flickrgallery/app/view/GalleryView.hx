@@ -23,6 +23,7 @@ class GalleryView extends DataView<GalleryItemView> implements mmvc.api.IViewCon
 	{
 		tagName = "ul";
 		super();
+		element.className = "container";
 		element.setAttribute("id", htmlId);
 		trace('GalleryView.new');
 	}
@@ -36,8 +37,8 @@ class GalleryView extends DataView<GalleryItemView> implements mmvc.api.IViewCon
 	{
 		for( child in this.children )
 		{
-			//this.removeChild(child.element);
-			js.Browser.document.removeChild(child.element);
+			//this.removeChild(child);
+			//js.Browser.document.removeChild(child.element);
 		}
 	}
 

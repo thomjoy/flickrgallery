@@ -14,6 +14,11 @@ class SearchBoxView extends View implements mmvc.api.IViewContainer
 	public var viewAdded:Dynamic -> Void;
 	public var viewRemoved:Dynamic -> Void;
 
+	public function isAdded(view)
+	{
+		return true;
+	}
+
 	public function new()
 	{
 		tagName = "div";
@@ -21,11 +26,6 @@ class SearchBoxView extends View implements mmvc.api.IViewContainer
 		element.className = "form-inline";
 		element.setAttribute("id", "container-searchbox");
 		trace('SearchBoxView.new');
-	}
-
-	public function isAdded(view:Dynamic):Bool
-	{
-		return true;
 	}
 
 	public function createViews()
@@ -41,6 +41,7 @@ class SearchBoxView extends View implements mmvc.api.IViewContainer
 	override function initialize()
 	{
 		super.initialize();
-		js.Browser.document.getElementById('header').appendChild(element);
+		//trace('Adding to header');
+		//js.Browser.document.getElementById('header').appendChild(element);
 	}	
 }

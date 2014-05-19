@@ -31,7 +31,6 @@ class GalleryItemView extends View implements mmvc.api.IViewContainer
 	{
 		var favouriteStatus = untyped __js__('event.target.parentNode.getAttribute("data-favourite")');
 
-		//trace('Dispatching: ' + favouriteStatus);
 		untyped __js__(' 
 			var b = event.target.parentNode.getAttribute("data-favourite");
 			var n = b == "true" ? "false" : "true";
