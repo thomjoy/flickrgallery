@@ -265,4 +265,9 @@ class View
 		return index;
 	}
 
+	public function getChildren()
+	{
+		return this.children;
+	}
+
 }

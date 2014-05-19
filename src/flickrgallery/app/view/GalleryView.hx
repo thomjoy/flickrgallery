@@ -32,6 +32,15 @@ class GalleryView extends DataView<GalleryItemView> implements mmvc.api.IViewCon
 		trace('GalleryView.createViews');
 	}
 
+	public function clearAll()
+	{
+		for( child in this.children )
+		{
+			//this.removeChild(child.element);
+			js.Browser.document.removeChild(child.element);
+		}
+	}
+
 	override function initialize()
 	{
 		super.initialize();

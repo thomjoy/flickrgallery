@@ -48,7 +48,10 @@ class GalleryViewMediator extends mmvc.impl.Mediator<GalleryView>
 
 			case "Remove":
 			{
-				trace('Remove the old subviews');
+				for( galleryItem in view.getChildren() )
+				{
+					view.removeChild(galleryItem);
+				}
 			}
 		}
 	}

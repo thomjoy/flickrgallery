@@ -34,7 +34,7 @@ class AppViewMediator extends mmvc.impl.Mediator<AppView>
 		view.createViews();
 
 		//mediate(gallery.signal.add(onGalleryChange));
-		//mediate(favourites.signal.add(onFavouritesChange));
+		mediate(favourites.signal.add(onFavouritesChange));
 		trace('AppViewMediator.onRegister');
 	}
 
@@ -46,7 +46,9 @@ class AppViewMediator extends mmvc.impl.Mediator<AppView>
 
 	public function onFavouritesChange(event:String)
 	{
-		return true;
+		trace('onFavouritesChange');
+		trace(event);
+		favourites.refresh();
 	}
 
 	override public function onRemove():Void
@@ -54,6 +56,4 @@ class AppViewMediator extends mmvc.impl.Mediator<AppView>
 		super.onRemove();
 		trace('AppViewMediator.onRemove');
 	}
-
-
 }

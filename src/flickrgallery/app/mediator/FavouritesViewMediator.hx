@@ -25,7 +25,7 @@ class FavouritesViewMediator extends mmvc.impl.Mediator<FavouritesView>
 	{
 		super.onRegister();
 		
-		//mediate(collection.changed.add(onGalleryUpdate));
+		mediate(collection.changed.add(onGalleryUpdate));
 		trace('GalleryViewMediator.onRegister');
 	}
 

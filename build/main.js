@@ -310,7 +310,7 @@ flickrgallery.app.api.Flickr.prototype = {
 	,SECRET: null
 	,signal: null
 	,createUrl: function(method,param) {
-		return "https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + this.API_KEY + "&tags=" + param + "&format=json&nojsoncallback=1";
+		return "https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + this.API_KEY + "&tags=" + param + "&format=json&nojsoncallback=1&per_page=24";
 	}
 	,makeRequest: function(method,param) {
 		var loader = new mloader.JsonLoader(this.createUrl(method,param));
@@ -586,13 +586,16 @@ flickrgallery.app.mediator.AppViewMediator.prototype = $extend(mmvc.impl.Mediato
 	,onRegister: function() {
 		mmvc.impl.Mediator.prototype.onRegister.call(this);
 		this.view.createViews();
+		this.mediate(this.favourites.signal.add($bind(this,this.onFavouritesChange)));
 		console.log("AppViewMediator.onRegister");
 	}
 	,onGalleryChange: function(id,event) {
 		console.log(id + " : " + event);
 	}
 	,onFavouritesChange: function(event) {
-		return true;
+		console.log("onFavouritesChange");
+		console.log(event);
+		this.favourites.refresh();
 	}
 	,onRemove: function() {
 		mmvc.impl.Mediator.prototype.onRemove.call(this);
@@ -631,6 +634,7 @@ flickrgallery.app.mediator.FavouritesViewMediator.prototype = $extend(mmvc.impl.
 	,gallery: null
 	,onRegister: function() {
 		mmvc.impl.Mediator.prototype.onRegister.call(this);
+		this.mediate(this.collection.get_changed().add($bind(this,this.onGalleryUpdate)));
 		console.log("GalleryViewMediator.onRegister");
 	}
 	,onRemove: function() {
@@ -666,6 +670,7 @@ flickrgallery.app.mediator.GalleryItemViewMediator.__super__ = mmvc.impl.Mediato
 flickrgallery.app.mediator.GalleryItemViewMediator.prototype = $extend(mmvc.impl.Mediator.prototype,{
 	model: null
 	,collection: null
+	,favourites: null
 	,onRegister: function() {
 		mmvc.impl.Mediator.prototype.onRegister.call(this);
 		this.mediate(this.view.signal.add($bind(this,this.onClick)));
@@ -675,6 +680,7 @@ flickrgallery.app.mediator.GalleryItemViewMediator.prototype = $extend(mmvc.impl
 		if(status == "false") castStatus = false; else castStatus = true;
 		var imgId = view.element.getAttribute("data-img-id");
 		this.collection.findByImgId(imgId).toggleFavourite(castStatus);
+		this.favourites.update(imgId,!castStatus);
 	}
 	,__class__: flickrgallery.app.mediator.GalleryItemViewMediator
 });
@@ -710,7 +716,13 @@ flickrgallery.app.mediator.GalleryViewMediator.prototype = $extend(mmvc.impl.Med
 			}
 			break;
 		case "Remove":
-			console.log("Remove the old subviews");
+			var _g11 = 0;
+			var _g21 = this.view.getChildren();
+			while(_g11 < _g21.length) {
+				var galleryItem1 = _g21[_g11];
+				++_g11;
+				this.view.removeChild(galleryItem1);
+			}
 			break;
 		}
 	}
@@ -1063,12 +1075,37 @@ flickrgallery.app.model.GalleryModel.prototype = $extend(mdata.ArrayList.prototy
 });
 flickrgallery.app.model.FavouritesModel = function(values) {
 	flickrgallery.app.model.GalleryModel.call(this,values);
+	this.signal = new msignal.Signal1();
 };
 $hxClasses["flickrgallery.app.model.FavouritesModel"] = flickrgallery.app.model.FavouritesModel;
 flickrgallery.app.model.FavouritesModel.__name__ = ["flickrgallery","app","model","FavouritesModel"];
 flickrgallery.app.model.FavouritesModel.__super__ = flickrgallery.app.model.GalleryModel;
 flickrgallery.app.model.FavouritesModel.prototype = $extend(flickrgallery.app.model.GalleryModel.prototype,{
-	__class__: flickrgallery.app.model.FavouritesModel
+	galleryModel: null
+	,signal: null
+	,refresh: function() {
+		var results = [];
+		var _g = 0;
+		var _g1 = this.source;
+		while(_g < _g1.length) {
+			var model = _g1[_g];
+			++_g;
+			if(model.favourite == true) results.push(model);
+		}
+		return results;
+	}
+	,update: function(imgId,status) {
+		var imgModel = this.galleryModel.findByImgId(imgId);
+		if(status == true) {
+			this.add(imgModel);
+			this.signal.dispatch(imgModel.url);
+			console.log("Add to favourites");
+		} else {
+			this.remove(this.galleryModel.findByImgId(imgId));
+			console.log("Remove from favourites");
+		}
+	}
+	,__class__: flickrgallery.app.model.FavouritesModel
 });
 flickrgallery.app.model.GalleryItemModel = function(id,url) {
 	this.id = id;
@@ -1261,6 +1298,9 @@ flickrgallery.core.View.prototype = {
 		}
 		return this.index;
 	}
+	,getChildren: function() {
+		return this.children;
+	}
 	,__class__: flickrgallery.core.View
 	,__properties__: {set_index:"set_index"}
 };
@@ -1306,12 +1346,12 @@ flickrgallery.app.view.AppView.prototype = $extend(flickrgallery.core.View.proto
 		this.addChild(searchBoxView);
 		this.viewAdded(searchBoxView);
 		this.viewAdded(searchBoxView.children[1]);
-		var galleryView = new flickrgallery.app.view.GalleryView("gallery");
-		this.addChild(galleryView);
-		this.viewAdded(galleryView);
 		var favouritesView = new flickrgallery.app.view.FavouritesView("favourites");
 		this.addChild(favouritesView);
 		this.viewAdded(favouritesView);
+		var galleryView = new flickrgallery.app.view.GalleryView("gallery");
+		this.addChild(galleryView);
+		this.viewAdded(galleryView);
 		console.log("AppView.createViews");
 	}
 	,initialize: function() {
@@ -1394,6 +1434,15 @@ flickrgallery.app.view.GalleryView.prototype = $extend(flickrgallery.core.DataVi
 	,createViews: function() {
 		console.log("GalleryView.createViews");
 	}
+	,clearAll: function() {
+		var _g = 0;
+		var _g1 = this.children;
+		while(_g < _g1.length) {
+			var child = _g1[_g];
+			++_g;
+			window.document.removeChild(child.element);
+		}
+	}
 	,initialize: function() {
 		flickrgallery.core.DataView.prototype.initialize.call(this);
 		window.document.getElementById("app-container").appendChild(this.element);
@@ -1401,7 +1450,10 @@ flickrgallery.app.view.GalleryView.prototype = $extend(flickrgallery.core.DataVi
 	,__class__: flickrgallery.app.view.GalleryView
 });
 flickrgallery.app.view.FavouritesView = function(htmlId) {
+	this.tagName = "ul";
 	flickrgallery.app.view.GalleryView.call(this,htmlId);
+	this.element.setAttribute("id",htmlId);
+	console.log("FavouritesView.new");
 };
 $hxClasses["flickrgallery.app.view.FavouritesView"] = flickrgallery.app.view.FavouritesView;
 flickrgallery.app.view.FavouritesView.__name__ = ["flickrgallery","app","view","FavouritesView"];
@@ -1410,9 +1462,12 @@ flickrgallery.app.view.FavouritesView.prototype = $extend(flickrgallery.app.view
 	createViews: function() {
 		console.log("FavouritesView.createViews");
 	}
+	,update: function() {
+		console.log("here");
+	}
 	,initialize: function() {
 		flickrgallery.app.view.GalleryView.prototype.initialize.call(this);
-		window.document.getElementById("app-container").appendChild(this.element);
+		window.document.getElementById("favourites-container").appendChild(this.element);
 	}
 	,__class__: flickrgallery.app.view.FavouritesView
 });
@@ -4011,10 +4066,11 @@ mmvc.impl.Mediator.__meta__ = { fields : { injector : { name : ["injector"], typ
 flickrgallery.app.mediator.AppViewMediator.__meta__ = { fields : { gallery : { name : ["gallery"], type : ["flickrgallery.app.model.GalleryModel"], inject : null}, favourites : { name : ["favourites"], type : ["flickrgallery.app.model.FavouritesModel"], inject : null}}};
 flickrgallery.app.mediator.ButtonViewMediator.__meta__ = { fields : { galleryUpdateSignal : { name : ["galleryUpdateSignal"], type : ["flickrgallery.app.signal.GalleryUpdateSignal"], inject : null}}};
 flickrgallery.app.mediator.FavouritesViewMediator.__meta__ = { fields : { collection : { name : ["collection"], type : ["flickrgallery.app.model.FavouritesModel"], inject : null}, gallery : { name : ["gallery"], type : ["flickrgallery.app.model.GalleryModel"], inject : null}}};
-flickrgallery.app.mediator.GalleryItemViewMediator.__meta__ = { fields : { model : { name : ["model"], type : ["flickrgallery.app.model.GalleryItemModel"], inject : null}, collection : { name : ["collection"], type : ["flickrgallery.app.model.GalleryModel"], inject : null}}};
+flickrgallery.app.mediator.GalleryItemViewMediator.__meta__ = { fields : { model : { name : ["model"], type : ["flickrgallery.app.model.GalleryItemModel"], inject : null}, collection : { name : ["collection"], type : ["flickrgallery.app.model.GalleryModel"], inject : null}, favourites : { name : ["favourites"], type : ["flickrgallery.app.model.FavouritesModel"], inject : null}}};
 flickrgallery.app.mediator.GalleryViewMediator.__meta__ = { fields : { collection : { name : ["collection"], type : ["flickrgallery.app.model.GalleryModel"], inject : null}}};
 mdata.Collection.__meta__ = { obj : { 'interface' : null}};
 mdata.List.__meta__ = { obj : { 'interface' : null}};
+flickrgallery.app.model.FavouritesModel.__meta__ = { fields : { galleryModel : { name : ["galleryModel"], type : ["flickrgallery.app.model.GalleryModel"], inject : null}}};
 flickrgallery.app.model.GalleryItemModel.ADD_FAVOURITE = "ADD_FAVOURITE";
 flickrgallery.app.model.GalleryItemModel.REMOVE_FAVOURITE = "REMOVE_FAVOURITE";
 flickrgallery.core.View.ADDED = "added";

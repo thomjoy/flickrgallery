@@ -8,10 +8,10 @@ nav #header div button { margin-left: 6px; }
 #app-container { margin-top: 50px; }
 
 #gallery { list-style-type: none; margin-top: 20px; width: 100%; }
-#gallery li { float: left; }
-#gallery li img { width: 120px; }
+#gallery li { float: left; height: 120px; margin: 4px; padding: 4px; background-color: #eee; }
+#gallery li img { width: 120px; max-height: 120px; }
 #gallery li[data-favourite="true"] img { border: 1px solid red; }
 
-#mylist { list-style-type: none; overflow: hidden; margin: 0px; padding: 0px; background-color: #eee; }
-#mylist li { float: left; padding: 4px; margin: 4px; background-color: #fff; }
-#mylist li img { width: 50px; }
+#favourites { list-style-type: none; overflow: hidden; margin: 0px; padding: 0px; background-color: #eee; }
+#favourites li { float: left; padding: 4px; margin: 4px; background-color: #fff; }
+#favourites li img { width: 50px; }

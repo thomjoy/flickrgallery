@@ -22,7 +22,7 @@ class Flickr
 	public function createUrl(method: String, param: String)
 	{
 		return "https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" +
-				this.API_KEY + "&tags=" + param + "&format=json&nojsoncallback=1";
+				this.API_KEY + "&tags=" + param + "&format=json&nojsoncallback=1&per_page=24";
 	}
 
 	public function makeRequest(method: String, param: String)

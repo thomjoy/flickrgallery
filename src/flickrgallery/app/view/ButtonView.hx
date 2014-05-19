@@ -46,22 +46,5 @@ class ButtonView extends View implements mmvc.api.IViewContainer
 		searchTerm = cast js.Browser.document.getElementById('input-search');
 
 		this.clickSignal.dispatch(DO_SEARCH, searchTerm.value);
-
-		/*
-		var req = new js.html.XMLHttpRequest();
-		var url = "https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=4111e112a393aefbf0a66241479722cd&tags=" + searchTerm.value + "&format=json&nojsoncallback=1";
-		
-		req.onreadystatechange = untyped __js__("function(){
-			var allGood = (req.readyState == 4 && req.status == 200);
-	    	if( allGood ) {
-				document.getElementById('gallery').innerHTML = JSON.parse(req.responseText).photos.photo.map(function(p) {
-	        		return '<li><img src=http://farm' + p.farm + '.staticflickr.com/' + p.server + '/' + p.id + '_' + p.secret + '.jpg /></li>';
-	        	});
-			}
-		};");
-
-		req.open("GET", url, true);
-		req.send();
-		*/
 	}
 }
