@@ -15,7 +15,7 @@ nav { background-color: #eee; border-bottom: 1px solid #ddd !important; }
 #gallery li img { width: 120px; max-height: 120px; height: 100%; }
 #gallery li[data-favourite="true"] { background-color: #dd2e2f; }
 
-#favourites { list-style-type: none; overflow: hidden; margin: 0px; padding: 0px; background-color: #eee; }
-#favourites li { float: left; padding: 4px; margin: 4px; background-color: #fff; }
+#favourites { list-style-type: none; overflow: hidden; margin: 0px; padding: 0px; background-color: #eee; max-height: 102px; }
+#favourites li { float: left; padding: 4px; margin: 4px; background-color: #fff; max-height: 72px; border: 1px solid #ddd; }
 #favourites li img { width: 60px; max-height: 60px; }
 #favourites-status { padding-left: 4px; color: #333; }
