@@ -647,7 +647,6 @@ flickrgallery.app.mediator.FavouritesItemViewMediator.prototype = $extend(mmvc.i
 		parent = js.Boot.__cast(viewTarget.parent , flickrgallery.app.view.FavouritesView);
 		parent.removeChild(viewTarget);
 		parent.updateStatus(this.collection.get_length());
-		__js__("document.querySelectorAll(\"#gallery li [data-img-id=\"" + imgId + "\"]\")[0].setAttribute(\"data-favourite\", \"false\")");
 	}
 	,__class__: flickrgallery.app.mediator.FavouritesItemViewMediator
 });
@@ -1535,7 +1534,18 @@ flickrgallery.app.view.FavouritesView.prototype = $extend(flickrgallery.app.view
 		flickrgallery.app.view.GalleryView.prototype.initialize.call(this);
 	}
 	,updateStatus: function(numItems) {
-		if(numItems == 0) this.status.innerHTML = "No favourites"; else this.status.innerHTML = numItems + " favourites";
+		var statusLine;
+		switch(numItems) {
+		case 0:
+			statusLine = "No favourites";
+			break;
+		case 1:
+			statusLine = numItems + " favourite";
+			break;
+		default:
+			statusLine = numItems + " favourites";
+		}
+		this.status.innerHTML = statusLine;
 	}
 	,__class__: flickrgallery.app.view.FavouritesView
 });

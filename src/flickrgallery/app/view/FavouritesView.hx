@@ -29,6 +29,13 @@ class FavouritesView extends GalleryView
 
 	public function updateStatus(numItems: Int)
 	{
-		status.innerHTML = numItems == 0 ? "No favourites" : numItems + " favourites";
+		var statusLine = switch(numItems)
+		{
+			case 0: "No favourites";
+			case 1: numItems + " favourite";
+			default: numItems + " favourites";
+		}
+
+		status.innerHTML = statusLine;
 	}
 }
