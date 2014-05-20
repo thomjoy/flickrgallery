@@ -23,7 +23,7 @@ class FavouritesModel extends GalleryModel
 
     for( model in this.source )
     {
-      if( model.favourite == true ) 
+      if( model.isFavourite == true ) 
       {
         results.push(model);
       }

@@ -5,13 +5,16 @@ import js.Browser;
 
 class FavouritesView extends GalleryView
 {
+	public var status: js.html.Element;
+
 	public function new(htmlId: String)
 	{
 		tagName = "ul";
 		super(htmlId);
 		element.setAttribute("id", htmlId);
 
-		var status = Browser.document.createElement("div");
+		// status element thingy
+		status = Browser.document.createElement("div");
 		status.setAttribute("id", "favourites-status");
 		status.className = "";
 		element.appendChild(status);
@@ -22,5 +25,10 @@ class FavouritesView extends GalleryView
 	override function initialize()
 	{
 		super.initialize();
+	}
+
+	public function updateStatus(numItems: Int)
+	{
+		status.innerHTML = numItems == 0 ? "No favourites" : numItems + " favourites";
 	}
 }

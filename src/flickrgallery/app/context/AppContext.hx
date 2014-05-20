@@ -23,7 +23,7 @@ class AppContext extends mmvc.impl.Context
 		super(contextView);
 	}
 
-	/**
+	/** 
 	Overrides startup to configure all context commands, models and mediators
 	@see mmvc.impl.Context
 	*/
@@ -52,6 +52,7 @@ class AppContext extends mmvc.impl.Context
 
 		// Dynamically added
 		mediatorMap.mapView(GalleryItemView, GalleryItemViewMediator);
+		mediatorMap.mapView(FavouritesItemView, FavouritesItemViewMediator); 
 
 		// wiring for main application module
 		mediatorMap.mapView(AppView, AppViewMediator);

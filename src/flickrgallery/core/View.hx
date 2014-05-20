@@ -173,9 +173,9 @@ class View
 	*/
 	public function addChild(view:View)
 	{
-		//trace('addChild: ' + view.element.id);
 		view.signal.add(this.dispatch);
 		view.parent = this;
+		trace("child: " + view.id + " has parent " + this.id);
 		view.index = children.length;
 
 		children.push(view);

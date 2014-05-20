@@ -46,7 +46,7 @@ class GalleryUpdateCommand extends mmvc.impl.Command
 				var id = Reflect.field(photo, 'id');
 				var secret = Reflect.field(photo, 'secret');
 				var url = "http://farm" + farm + ".staticflickr.com/" + server + "/" + id + "_" + secret + "_n.jpg";
-				
+
 				var model = new GalleryItemModel(id, url);
 				resultArray.push(model);
 			}

@@ -36,7 +36,7 @@ class GalleryModel extends mdata.ArrayList<GalleryItemModel>
 
 		for( model in this.source )
 		{
-			if( model.favourite == true ) 
+			if( model.isFavourite == true ) 
 			{
 				results.push(model);
 			}

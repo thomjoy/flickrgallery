@@ -1,7 +1,7 @@
 package flickrgallery.app.mediator;
 
 import flickrgallery.app.view.FavouritesView;
-import flickrgallery.app.view.GalleryItemView;
+import flickrgallery.app.view.FavouritesItemView;
 
 import flickrgallery.app.model.FavouritesModel;
 
@@ -18,7 +18,7 @@ class FavouritesViewMediator extends mmvc.impl.Mediator<FavouritesView>
 	override function onRegister()
 	{
 		super.onRegister();
-	
+		
 		// when the collection changes, update the view
 		mediate(collection.signal.add(onUpdate));
 	}
@@ -36,8 +36,9 @@ class FavouritesViewMediator extends mmvc.impl.Mediator<FavouritesView>
 			case "Add":
 			{
 				var fave = collection.findByImgId( id );
-				var itemView = new GalleryItemView(fave.id, fave.url);
-				view.addChild(itemView);
+				var itemView = new FavouritesItemView(fave.id, fave.url, fave.isFavourite);
+				//itemView.parent = this.view;
+				this.view.addChild(itemView);
 			}
 
 			case "Remove":
@@ -49,14 +50,12 @@ class FavouritesViewMediator extends mmvc.impl.Mediator<FavouritesView>
 					if( js.Browser.document.getElementById(child.id).getAttribute('data-img-id') == id )
 					{
 						trace("Remove");
-						view.removeChild( child );
+						this.view.removeChild( child );
 					}
 				}
 			}
 		}
 
-		var elem = (js.Browser.document.getElementById('favourites-status'));
-		var str = collection.length == 0 ? "No favourites" : collection.length + " favourites";
-		elem.innerHTML = str;
+		view.updateStatus(collection.length);
 	}
 }

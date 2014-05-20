@@ -27,9 +27,7 @@ class GalleryItemViewMediator extends mmvc.impl.Mediator<GalleryItemView>
 	override function onRegister()
 	{
 		super.onRegister();
-
 		mediate(view.signal.add(onClick));
-		//trace('GalleryViewMediator.onRegister');
 	}
 
 	public function onClick(status: String, view: View)
@@ -39,7 +37,7 @@ class GalleryItemViewMediator extends mmvc.impl.Mediator<GalleryItemView>
 		var imgId = untyped __js__('view.element.getAttribute("data-img-id")');
 		
 		collection.findByImgId(imgId).toggleFavourite(castStatus);
-		
+
 		// fix, change this to use a proper interface
 		favourites.update(imgId, !castStatus);
 	}
