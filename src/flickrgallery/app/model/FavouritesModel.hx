@@ -50,6 +50,5 @@ class FavouritesModel extends GalleryModel
     var strStatus = status ? "Add" : "Remove";
 
     signal.dispatch(imgModel.id, strStatus);
-    trace(this.length + " items in favourites");
   }
 }

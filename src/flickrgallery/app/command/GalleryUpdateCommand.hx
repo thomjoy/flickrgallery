@@ -24,7 +24,6 @@ class GalleryUpdateCommand extends mmvc.impl.Command
 	public function new()
 	{
 		super();
-		
 	}
 
 	override public function execute():Void
@@ -39,7 +38,6 @@ class GalleryUpdateCommand extends mmvc.impl.Command
 		
 		if( galleryModel.length > 0 )
 		{
-			trace('Clearing galleryModel of length: ' + galleryModel.length);
 			galleryModel.clear();
 		}
 
@@ -61,12 +59,8 @@ class GalleryUpdateCommand extends mmvc.impl.Command
 				resultArray.push(new GalleryItemModel(id, url));
 			}
 			
-			trace('galleryModel length: ' + galleryModel.length);
-			trace('galleryModel.addAll(' + resultArray.length + ')');
 			// fires an signal to GalleryViewMediator to create the subviews
 			galleryModel.addAll( resultArray );
-
-			trace('galleryModel new length: ' + galleryModel.length);
 		}
 	}
 }

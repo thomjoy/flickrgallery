@@ -30,7 +30,5 @@ class GalleryItemModel
 
 		var action = isFavourite ? GalleryItemModel.ADD_FAVOURITE :  GalleryItemModel.REMOVE_FAVOURITE;
 		signal.dispatch( id, action );
-
-		trace(action);
 	}
 }

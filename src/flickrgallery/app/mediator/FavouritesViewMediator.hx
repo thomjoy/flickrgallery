@@ -43,8 +43,7 @@ class FavouritesViewMediator extends mmvc.impl.Mediator<FavouritesView>
 
 			case "Remove":
 			{
-				var children = view.getChildren();
-				for( child in children )
+				for( child in view.getChildren().concat([]) )
 				{
 					if( js.Browser.document.getElementById(child.id).getAttribute('data-img-id') == id )
 					{

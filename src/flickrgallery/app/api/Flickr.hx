@@ -35,7 +35,6 @@ class Flickr
 
 	public function onLoadedContent(event: LoaderEvent<Json>)
 	{
-		trace(event.type);
 		signal.dispatch(event.target.content);
 	}
 

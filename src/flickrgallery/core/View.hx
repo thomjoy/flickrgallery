@@ -265,7 +265,6 @@ class View
 
 	public function getChildren()
 	{
-		trace('View.getChildren: View has ' + this.children.length + ' children');
 		return this.children;
 	}
 

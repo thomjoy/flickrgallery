@@ -326,7 +326,6 @@ flickrgallery.app.api.Flickr.prototype = {
 		loader.load();
 	}
 	,onLoadedContent: function(event) {
-		console.log(event.type);
 		this.signal.dispatch(event.target.content);
 	}
 	,search: function(searchTerm) {
@@ -382,10 +381,7 @@ flickrgallery.app.command.GalleryUpdateCommand.prototype = $extend(mmvc.impl.Com
 			$r = HxOverrides.dateStr(_this);
 			return $r;
 		}(this)));
-		if(this.galleryModel.get_length() > 0) {
-			console.log("Clearing galleryModel of length: " + this.galleryModel.get_length());
-			this.galleryModel.clear();
-		}
+		if(this.galleryModel.get_length() > 0) this.galleryModel.clear();
 		if(Reflect.field(resp,"stat") == "ok") {
 			var resultArray = [];
 			var photos;
@@ -401,10 +397,7 @@ flickrgallery.app.command.GalleryUpdateCommand.prototype = $extend(mmvc.impl.Com
 				var url = "http://farm" + farm + ".staticflickr.com/" + server + "/" + id + "_" + secret + "_n.jpg";
 				resultArray.push(new flickrgallery.app.model.GalleryItemModel(id,url));
 			}
-			console.log("galleryModel length: " + this.galleryModel.get_length());
-			console.log("galleryModel.addAll(" + resultArray.length + ")");
 			this.galleryModel.addAll(resultArray);
-			console.log("galleryModel new length: " + this.galleryModel.get_length());
 		}
 	}
 	,__class__: flickrgallery.app.command.GalleryUpdateCommand
@@ -675,10 +668,10 @@ flickrgallery.app.mediator.FavouritesViewMediator.prototype = $extend(mmvc.impl.
 			this.view.addChild(itemView);
 			break;
 		case "Remove":
-			var children = this.view.getChildren();
 			var _g = 0;
-			while(_g < children.length) {
-				var child = children[_g];
+			var _g1 = this.view.getChildren().concat([]);
+			while(_g < _g1.length) {
+				var child = _g1[_g];
 				++_g;
 				if(window.document.getElementById(child.id).getAttribute("data-img-id") == id) this.view.removeChild(child);
 			}
@@ -740,7 +733,6 @@ flickrgallery.app.mediator.GalleryViewMediator.prototype = $extend(mmvc.impl.Med
 		var _g = event.type[0];
 		switch(_g) {
 		case "Add":
-			console.log(event.type[0]);
 			var galleryItemModels = this.collection.getAll();
 			var _g1 = 0;
 			while(_g1 < galleryItemModels.length) {
@@ -749,10 +741,8 @@ flickrgallery.app.mediator.GalleryViewMediator.prototype = $extend(mmvc.impl.Med
 				var itemView = new flickrgallery.app.view.GalleryItemView(galleryItemModel.id,galleryItemModel.url,galleryItemModel.isFavourite);
 				this.view.addChild(itemView);
 			}
-			console.log("(Add) " + this.view.getChildren().length + " view has child views");
 			break;
 		case "Remove":
-			console.log(event.type[0]);
 			this.view.removeAllChildViews();
 			break;
 		}
@@ -1135,7 +1125,6 @@ flickrgallery.app.model.FavouritesModel.prototype = $extend(flickrgallery.app.mo
 		var strStatus;
 		if(status) strStatus = "Add"; else strStatus = "Remove";
 		this.signal.dispatch(imgModel.id,strStatus);
-		console.log(this.get_length() + " items in favourites");
 	}
 	,__class__: flickrgallery.app.model.FavouritesModel
 });
@@ -1157,7 +1146,6 @@ flickrgallery.app.model.GalleryItemModel.prototype = {
 		var action;
 		if(this.isFavourite) action = "ADD_FAVOURITE"; else action = "REMOVE_FAVOURITE";
 		this.signal.dispatch(this.id,action);
-		console.log(action);
 	}
 	,__class__: flickrgallery.app.model.GalleryItemModel
 };
@@ -1331,7 +1319,6 @@ flickrgallery.core.View.prototype = {
 		return this.index;
 	}
 	,getChildren: function() {
-		console.log("View.getChildren: View has " + this.children.length + " children");
 		return this.children;
 	}
 	,removeAllChildViews: function() {

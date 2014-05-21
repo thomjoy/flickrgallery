@@ -49,20 +49,16 @@ class GalleryViewMediator extends mmvc.impl.Mediator<GalleryView>
 		{
 			case "Add":
 			{
-				trace(event.type[0]);
 				var galleryItemModels = collection.getAll();
 				for( galleryItemModel in galleryItemModels )
 				{
 					var itemView = new GalleryItemView(galleryItemModel.id, galleryItemModel.url, galleryItemModel.isFavourite);
 					view.addChild(itemView);
 				}
-
-				trace( "(Add) " + view.getChildren().length + " view has child views");
 			}
 
 			case "Remove":
 			{
-				trace(event.type[0]);
 				view.removeAllChildViews();
 			}
 		}
