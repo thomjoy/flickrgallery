@@ -131,6 +131,8 @@ class View
 	*/
 	var className:String;
 
+	var model:Dynamic;
+
 	public function new()
 	{
 		//create unique identifier for this view
@@ -175,7 +177,7 @@ class View
 	{
 		view.signal.add(this.dispatch);
 		view.parent = this;
-		trace("child: " + view.id + " has parent " + this.id);
+		//trace("child: " + view.id + " has parent " + this.id);
 		view.index = children.length;
 
 		children.push(view);
@@ -205,11 +207,7 @@ class View
 			view.parent = null;
 			view.index = -1;
 
-			#if flash
-			sprite.removeChild(view.sprite);
-			#elseif js
 			element.removeChild(view.element);
-			#end
 
 			for(i in oldIndex...children.length)
 			{
@@ -267,7 +265,15 @@ class View
 
 	public function getChildren()
 	{
+		trace('View.getChildren: View has ' + this.children.length + ' children');
 		return this.children;
 	}
 
+	public function removeAllChildViews()
+	{
+		for( child in children.concat([]) )
+		{
+			removeChild(child);
+		}
+	}
 }

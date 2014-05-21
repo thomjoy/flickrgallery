@@ -18,8 +18,6 @@ class FavouritesView extends GalleryView
 		status.setAttribute("id", "favourites-status");
 		status.className = "";
 		element.appendChild(status);
-		
-		trace('FavouritesView.new');
 	}
 
 	override function initialize()

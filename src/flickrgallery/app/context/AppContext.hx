@@ -23,20 +23,15 @@ class AppContext extends mmvc.impl.Context
 		super(contextView);
 	}
 
-	/** 
-	Overrides startup to configure all context commands, models and mediators
-	@see mmvc.impl.Context
-	*/
 	override public function startup()
 	{
-		trace('AppContext.startup');
-
 		// Flickr API Service
 		injector.mapSingleton(Flickr);
 
 		// Gallery Model
 		injector.mapSingleton(GalleryModel);
 		injector.mapSingleton(FavouritesModel);
+		injector.mapSingleton(GalleryView);
 
 		// Gallery Item Models
 		injector.mapClass(GalleryItemModel, GalleryItemModel);
@@ -60,6 +55,6 @@ class AppContext extends mmvc.impl.Context
 
 	override public function shutdown()
 	{
-		trace('shutdown');
+
 	}
 }

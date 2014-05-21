@@ -15,6 +15,5 @@ class InputView extends View
 		element.setAttribute("placeholder", "Search...");
 		element.setAttribute("id", "input-search");
 		element.className = "form-control";
-		trace('InputView.new');
 	}
 }

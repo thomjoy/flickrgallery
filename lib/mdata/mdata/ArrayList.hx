@@ -302,9 +302,12 @@ class ArrayList<T> extends CollectionBase<T>, implements List<T>
 
 		var s = source.length;
 		var values = source.splice(0, source.length);
-		
+		trace('REMOVED');
 		if (eventsEnabled)
+		{
+			
 			notifyChanged(Remove(values), Range(0, s));
+		}
 	}
 
 	override function notifyChanged(eventType:CollectionEventType<T>, ?payload:Dynamic)

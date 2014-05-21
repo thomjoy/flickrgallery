@@ -15,8 +15,8 @@ class Flickr
 
 	public function new()
 	{
-		this.API_KEY = "4111e112a393aefbf0a66241479722cd";
-		this.signal = new Signal1<Json>();
+		API_KEY = "4111e112a393aefbf0a66241479722cd";
+		signal = new Signal1<Json>();
 	}
 
 	public function createUrl(method: String, param: String)
@@ -27,25 +27,16 @@ class Flickr
 
 	public function makeRequest(method: String, param: String)
 	{
+		trace('makeRequest');
 		var loader = new JsonLoader(this.createUrl(method, param));
-		loader.loaded.add(onLoadedContent);
+		loader.loaded.add(onLoadedContent).forType(Complete);
 		loader.load();
 	}
 
 	public function onLoadedContent(event: LoaderEvent<Json>)
 	{
-		switch (event.type)
-		{
-			case Complete:
-				// do stuff with the JSON
-				this.signal.dispatch(event.target.content);
-
-			case Fail(e):
-				this.signal.dispatch(event.target.content);
-
-			default:
-				this.signal.dispatch(event.target.content);
-		}
+		trace(event.type);
+		signal.dispatch(event.target.content);
 	}
 
 	public function search(searchTerm: String)

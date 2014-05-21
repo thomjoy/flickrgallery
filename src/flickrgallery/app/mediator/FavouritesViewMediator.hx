@@ -46,10 +46,8 @@ class FavouritesViewMediator extends mmvc.impl.Mediator<FavouritesView>
 				var children = view.getChildren();
 				for( child in children )
 				{
-					trace( child );
 					if( js.Browser.document.getElementById(child.id).getAttribute('data-img-id') == id )
 					{
-						trace("Remove");
 						this.view.removeChild( child );
 					}
 				}

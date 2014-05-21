@@ -24,21 +24,32 @@ class GalleryUpdateCommand extends mmvc.impl.Command
 	public function new()
 	{
 		super();
+		
 	}
 
 	override public function execute():Void
 	{
 		flickr.search(this.searchTerm);
-		flickr.signal.add(this.handleFlickrSearchResponse);
+		flickr.signal.addOnce(this.handleFlickrSearchResponse);
 	}
 
 	function handleFlickrSearchResponse(resp: Json)
 	{
+		trace('handleFlickrSearchResponse @:' + Date.now().toString());
+		
+		if( galleryModel.length > 0 )
+		{
+			trace('Clearing galleryModel of length: ' + galleryModel.length);
+			galleryModel.clear();
+		}
+
+		// This should be handled by the signal.
 		if( Reflect.field(resp, 'stat') == 'ok' )
 		{
 			var resultArray = [];
-			var photos = cast(Reflect.field(Reflect.field(resp, 'photos'), 'photo'), Array<Dynamic>);
 
+			// This doesn't seem right..?
+			var photos = cast(Reflect.field(Reflect.field(resp, 'photos'), 'photo'), Array<Dynamic>);
 			for( photo in photos )
 			{
 				var farm = Reflect.field(photo, 'farm');
@@ -46,13 +57,16 @@ class GalleryUpdateCommand extends mmvc.impl.Command
 				var id = Reflect.field(photo, 'id');
 				var secret = Reflect.field(photo, 'secret');
 				var url = "http://farm" + farm + ".staticflickr.com/" + server + "/" + id + "_" + secret + "_n.jpg";
-
-				var model = new GalleryItemModel(id, url);
-				resultArray.push(model);
+				
+				resultArray.push(new GalleryItemModel(id, url));
 			}
-
-			galleryModel.clear();
+			
+			trace('galleryModel length: ' + galleryModel.length);
+			trace('galleryModel.addAll(' + resultArray.length + ')');
+			// fires an signal to GalleryViewMediator to create the subviews
 			galleryModel.addAll( resultArray );
+
+			trace('galleryModel new length: ' + galleryModel.length);
 		}
 	}
 }

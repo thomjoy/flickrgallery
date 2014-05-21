@@ -68,8 +68,6 @@ class AppView extends View implements mmvc.api.IViewContainer
 		var galleryView = new GalleryView('gallery');
 		addChild(galleryView);
 		this.viewAdded(galleryView);
-
-		trace('AppView.createViews');
 	}
 
 	override function initialize()

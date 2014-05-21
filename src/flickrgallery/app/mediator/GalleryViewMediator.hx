@@ -23,7 +23,7 @@ class GalleryViewMediator extends mmvc.impl.Mediator<GalleryView>
 		super.onRegister();
 		view.createViews();
 
-		mediate(collection.changed.add(onGalleryUpdate));
+		mediate(collection.changed.add(onCollectionUpdate));
 	}
 
 	override public function onRemove():Void
@@ -33,7 +33,6 @@ class GalleryViewMediator extends mmvc.impl.Mediator<GalleryView>
 
 	public function onFavouritesChange(imgId:Dynamic)
 	{
-		trace(imgId);
 		for( view in view.getChildren() )
 		{
 			if( view.id == imgId )
@@ -44,27 +43,27 @@ class GalleryViewMediator extends mmvc.impl.Mediator<GalleryView>
 	}
 
 	// Fix the typing here by firing the event with the proper parameters
-	public function onGalleryUpdate(event:Dynamic)
+	public function onCollectionUpdate(event:Dynamic)
 	{
 		switch(event.type[0])
 		{
 			case "Add":
 			{
-				for( galleryItem in collection.getAll() )
+				trace(event.type[0]);
+				var galleryItemModels = collection.getAll();
+				for( galleryItemModel in galleryItemModels )
 				{
-					var itemView = new GalleryItemView(galleryItem.id, galleryItem.url, galleryItem.isFavourite);
+					var itemView = new GalleryItemView(galleryItemModel.id, galleryItemModel.url, galleryItemModel.isFavourite);
 					view.addChild(itemView);
 				}
+
+				trace( "(Add) " + view.getChildren().length + " view has child views");
 			}
 
 			case "Remove":
 			{
-				for( galleryItem in view.getChildren() )
-				{
-					view.removeChild(galleryItem);
-				}
-
-				trace(this.view.getChildren().length);
+				trace(event.type[0]);
+				view.removeAllChildViews();
 			}
 		}
 	}

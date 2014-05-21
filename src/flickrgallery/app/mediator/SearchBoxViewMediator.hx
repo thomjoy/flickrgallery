@@ -13,12 +13,10 @@ class SearchBoxViewMediator extends mmvc.impl.Mediator<SearchBoxView>
 	{
 		super.onRegister();
 		view.createViews();
-		trace('SearchBoxViewMediator.onRegister');
 	}
 
 	override public function onRemove():Void
 	{
 		super.onRemove();
-		trace('SearchBoxViewMediator.onRemove');
 	}
 }

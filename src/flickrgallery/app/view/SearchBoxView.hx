@@ -25,23 +25,13 @@ class SearchBoxView extends View implements mmvc.api.IViewContainer
 		super();
 		element.className = "form-inline";
 		element.setAttribute("id", "container-searchbox");
-		trace('SearchBoxView.new');
 	}
 
 	public function createViews()
 	{
-		trace('SearchBoxView.createViews');
-		
 		var inputView = new InputView();
 		var buttonView = new ButtonView();
 		addChild(inputView);
 		addChild(buttonView);
-	}
-
-	override function initialize()
-	{
-		super.initialize();
-		//trace('Adding to header');
-		//js.Browser.document.getElementById('header').appendChild(element);
 	}	
 }

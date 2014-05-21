@@ -28,11 +28,10 @@ class ButtonView extends View implements mmvc.api.IViewContainer
 		element.setAttribute("id", "btn-search");
 		element.innerHTML = "Search";
 		element.className = "btn btn-primary";
-		element.onclick = clickHandler;
+		element.onclick = onSearch;
+		element.onkeyup = detectEnter;
 
 		this.clickSignal = new Signal2<String, String>();
-
-		trace('ButtonView.new');
 	}
 
 	override function remove()
@@ -40,7 +39,16 @@ class ButtonView extends View implements mmvc.api.IViewContainer
 		element.onclick = null;
 	}
 
-	function clickHandler(event:js.html.Event)
+	function detectEnter(event:js.html.Event)
+	{
+		//event.which = event.which || event.keyCode;
+    	//if(event.which == 13)
+    	//{
+        	onSearch(event);
+    	//}
+	}
+
+	function onSearch(event:js.html.Event)
 	{
 		var searchTerm: js.html.InputElement;
 		searchTerm = cast js.Browser.document.getElementById('input-search');
